@@ -1,0 +1,50 @@
+name: Export Bills
+
+on:
+  workflow_dispatch:
+    inputs:
+      kind:
+        description: "card or electricity"
+        default: "card"
+        required: true
+      from:
+        description: "Start date, YYYY-MM-DD"
+        default: ""
+        required: false
+      to:
+        description: "End date, YYYY-MM-DD"
+        default: ""
+        required: false
+      feeitemid:
+        description: "Electricity fee item id, for example 489 or 528"
+        default: ""
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Export bills
+        env:
+          SYNJONES_AUTH: ${{ secrets.SYNJONES_AUTH }}
+        run: |
+          args=(--kind "${{ inputs.kind }}")
+          if [ -n "${{ inputs.from }}" ]; then args+=(--from "${{ inputs.from }}"); fi
+          if [ -n "${{ inputs.to }}" ]; then args+=(--to "${{ inputs.to }}"); fi
+          if [ -n "${{ inputs.feeitemid }}" ]; then args+=(--feeitemid "${{ inputs.feeitemid }}"); fi
+          npm run export:bills -- "${args[@]}"
+
+      - name: Commit exported bills
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: export bills"
+          file_pattern: "exports/bills/*"

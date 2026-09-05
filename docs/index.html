@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>南林电力守夜</title>
+    <link rel="icon" href="./assets/njfu-power-alert.png">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <img src="./assets/njfu-power-alert.png" alt="">
+        <div>
+          <h1>南林电力守夜</h1>
+          <p>10栋717 · <span id="updatedAt">等待第一次采集</span></p>
+        </div>
+      </div>
+      <div class="status-pill" id="statusPill">未加载</div>
+    </header>
+
+    <main>
+      <section class="balance-grid" id="balances"></section>
+
+      <section class="panel usage-panel">
+        <div class="panel-head">
+          <h2>日耗统计</h2>
+          <div class="legend">
+            <span><i class="legend-dot lighting"></i>照明</span>
+            <span><i class="legend-dot ac"></i>空调</span>
+          </div>
+        </div>
+        <canvas id="dailyChart" height="320"></canvas>
+        <div class="daily-summary" id="dailySummary"></div>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

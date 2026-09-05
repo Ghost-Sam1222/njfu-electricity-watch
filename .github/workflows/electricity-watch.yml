@@ -1,0 +1,48 @@
+name: Electricity Watch
+
+on:
+  schedule:
+    # UTC 00:05 / 14:05 = Beijing 08:05 / 22:05.
+    - cron: "5 0,14 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  query:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Query electricity balances
+        env:
+          SYNJONES_AUTH: ${{ secrets.SYNJONES_AUTH }}
+          BARK_URL: ${{ secrets.BARK_URL }}
+          BARK_ICON_URL: ${{ vars.BARK_ICON_URL }}
+          PAGES_BASE_URL: ${{ vars.PAGES_BASE_URL }}
+        run: npm run query
+
+      - name: Commit updated data
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update electricity data"
+          file_pattern: "docs/data/*.json"
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - uses: actions/deploy-pages@v4

@@ -1,0 +1,14 @@
+{
+  "name": "njfu-card-power-watch",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "discover": "node src/query-electricity.mjs --discover",
+    "query": "node src/query-electricity.mjs",
+    "export:bills": "node src/export-bills.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

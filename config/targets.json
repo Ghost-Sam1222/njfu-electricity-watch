@@ -1,0 +1,56 @@
+{
+  "defaults": {
+    "baseUrl": "https://icard.njfu.edu.cn",
+    "source": "h5",
+    "kwhPrice": 1,
+    "roomCode": "10717",
+    "bark": {
+      "group": "南林电力守夜",
+      "sound": "alarm"
+    }
+  },
+  "targets": [
+    {
+      "id": "lighting",
+      "name": "本部研楼及9-13栋照明/插座",
+      "feeitemid": 489,
+      "sourceUrl": "https://icard.njfu.edu.cn/charge-app/#/pays?id=489",
+      "enabled": true,
+      "params": {
+        "type": "IEC"
+      },
+      "selectors": [
+        "学生公寓10栋"
+      ],
+      "threshold": {
+        "kwh": 8,
+        "amount": 5,
+        "dailyKwh": 4,
+        "minHours": 36,
+        "anomalyMultiplier": 1.8,
+        "anomalyMinSamples": 7
+      }
+    },
+    {
+      "id": "ac",
+      "name": "本部其他公寓空调",
+      "feeitemid": 528,
+      "sourceUrl": "https://icard.njfu.edu.cn/charge-app/#/pays?id=528",
+      "enabled": true,
+      "params": {
+        "type": "IEC"
+      },
+      "selectors": [
+        "10栋空调"
+      ],
+      "threshold": {
+        "kwh": 20,
+        "amount": 12,
+        "dailyKwh": 24,
+        "minHours": 20,
+        "anomalyMultiplier": 1.8,
+        "anomalyMinSamples": 7
+      }
+    }
+  ]
+}
