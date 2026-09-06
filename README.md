@@ -22,10 +22,11 @@ HTTPS_PROXY = http://用户名:密码@代理域名:端口
 如果你手上是 Clash 订阅，不要直接填到 `HTTPS_PROXY`，而是填：
 
 ```text
+CLASH_CONFIG_YAML = Clash/Mihomo 已生成的完整配置文件内容，优先使用
 CLASH_SUBSCRIPTION_URL = Clash 订阅链接
 ```
 
-Actions 会临时下载订阅并启动 Mihomo，把查询请求转到本地 `http://127.0.0.1:7890`。订阅链接只放 GitHub Secret，不要写进仓库。
+Actions 会临时启动 Mihomo，把查询请求转到本地 `http://127.0.0.1:7890`。如果有 `CLASH_CONFIG_YAML`，会直接使用它；否则再尝试下载 `CLASH_SUBSCRIPTION_URL`。配置和订阅链接只放 GitHub Secret，不要写进仓库。
 
 Node 运行时已经开启系统代理环境变量支持，会自动读取 Mihomo 本地代理，或手动填写的 `HTTPS_PROXY`、`HTTP_PROXY` 和 `NO_PROXY`。
 

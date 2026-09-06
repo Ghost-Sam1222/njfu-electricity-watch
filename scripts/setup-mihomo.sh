@@ -16,24 +16,27 @@ download_subscription() {
     -o "$config_file"
 }
 
-if [[ -z "${CLASH_SUBSCRIPTION_URL:-}" ]]; then
-  echo "CLASH_SUBSCRIPTION_URL is empty; skip Mihomo proxy."
-  exit 0
-fi
-
-echo "Downloading Clash subscription..."
-if ! download_subscription "$CLASH_SUBSCRIPTION_URL"; then
-  echo "Primary subscription URL failed; trying embedded provider URL..."
-  embedded_url="$(
-    SUBSCRIPTION_URL="$CLASH_SUBSCRIPTION_URL" node -e '
-      const url = new URL(process.env.SUBSCRIPTION_URL);
-      console.log(url.searchParams.get("url") || "");
-    '
-  )"
-  if [[ -z "$embedded_url" ]] || ! download_subscription "$embedded_url"; then
-    echo "Unable to download Clash subscription."
-    exit 1
+if [[ -n "${CLASH_CONFIG_YAML:-}" ]]; then
+  echo "Using Clash config from GitHub Secret..."
+  printf '%s\n' "$CLASH_CONFIG_YAML" > "$config_file"
+elif [[ -n "${CLASH_SUBSCRIPTION_URL:-}" ]]; then
+  echo "Downloading Clash subscription..."
+  if ! download_subscription "$CLASH_SUBSCRIPTION_URL"; then
+    echo "Primary subscription URL failed; trying embedded provider URL..."
+    embedded_url="$(
+      SUBSCRIPTION_URL="$CLASH_SUBSCRIPTION_URL" node -e '
+        const url = new URL(process.env.SUBSCRIPTION_URL);
+        console.log(url.searchParams.get("url") || "");
+      '
+    )"
+    if [[ -z "$embedded_url" ]] || ! download_subscription "$embedded_url"; then
+      echo "Unable to download Clash subscription."
+      exit 1
+    fi
   fi
+else
+  echo "No Clash config or subscription is configured; skip Mihomo proxy."
+  exit 0
 fi
 
 if ! grep -Eq '^(proxies|proxy-providers|proxy-groups|mixed-port|port|socks-port):' "$config_file"; then

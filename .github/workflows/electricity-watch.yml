@@ -18,6 +18,7 @@ jobs:
   query:
     runs-on: ubuntu-latest
     env:
+      HAS_CLASH_CONFIG: ${{ secrets.CLASH_CONFIG_YAML != '' }}
       HAS_CLASH_SUBSCRIPTION: ${{ secrets.CLASH_SUBSCRIPTION_URL != '' }}
     steps:
       - uses: actions/checkout@v4
@@ -28,8 +29,9 @@ jobs:
 
       - name: Start Mihomo proxy
         id: mihomo
-        if: ${{ env.HAS_CLASH_SUBSCRIPTION == 'true' }}
+        if: ${{ env.HAS_CLASH_CONFIG == 'true' || env.HAS_CLASH_SUBSCRIPTION == 'true' }}
         env:
+          CLASH_CONFIG_YAML: ${{ secrets.CLASH_CONFIG_YAML }}
           CLASH_SUBSCRIPTION_URL: ${{ secrets.CLASH_SUBSCRIPTION_URL }}
         run: bash scripts/setup-mihomo.sh
 
