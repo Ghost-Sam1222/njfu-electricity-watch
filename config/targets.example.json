@@ -42,7 +42,7 @@
         "type": "IEC"
       },
       "selectors": [
-        "主校区",
+        "本部校区",
         "10栋空调"
       ],
       "threshold": {

@@ -57,7 +57,7 @@ Node 运行时已经开启系统代理环境变量支持，会自动读取 Mihom
 我已经按你的宿舍生成了 `config/targets.json`，默认会查询：
 
 - 照明/插座：`https://icard.njfu.edu.cn/charge-app/#/pays?id=489`，先选 `主校区`，再选 `学生公寓10栋`，房间 `10717`
-- 空调：`https://icard.njfu.edu.cn/charge-app/#/pays?id=528`，先选 `主校区`，再选 `10栋空调`，房间 `10717`
+- 空调：`https://icard.njfu.edu.cn/charge-app/#/pays?id=528`，先选 `本部校区`，再选 `10栋空调`，房间 `10717`
 
 脚本会自动模拟这个流程：先请求楼栋下拉选项，按文字找到楼栋值，再把房间码带入 `IEC` 查询。你不需要手动知道接口字段名。
 
@@ -70,7 +70,7 @@ Node 运行时已经开启系统代理环境变量支持，会自动读取 Mihom
   },
   "targets": [
     { "selectors": ["主校区", "学生公寓10栋"] },
-    { "selectors": ["主校区", "10栋空调"] }
+    { "selectors": ["本部校区", "10栋空调"] }
   ]
 }
 ```
