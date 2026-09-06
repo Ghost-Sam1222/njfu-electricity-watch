@@ -20,6 +20,7 @@
         "type": "IEC"
       },
       "selectors": [
+        "主校区",
         "学生公寓10栋"
       ],
       "threshold": {
@@ -41,6 +42,7 @@
         "type": "IEC"
       },
       "selectors": [
+        "主校区",
         "10栋空调"
       ],
       "threshold": {
