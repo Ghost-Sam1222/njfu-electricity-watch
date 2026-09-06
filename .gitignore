@@ -4,3 +4,9 @@ node_modules/
 config/targets.local.json
 work/
 outputs/
+*.proxy.yaml
+*.proxy.yml
+clash*.yaml
+clash*.yml
+mihomo*.yaml
+mihomo*.yml
