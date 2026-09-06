@@ -19,14 +19,22 @@ BARK_URL = 你的 Bark 推送 URL
 HTTPS_PROXY = http://用户名:密码@代理域名:端口
 ```
 
-Node 运行时已经开启系统代理环境变量支持，会自动读取 `HTTPS_PROXY`、`HTTP_PROXY` 和 `NO_PROXY`。
+如果你手上是 Clash 订阅，不要直接填到 `HTTPS_PROXY`，而是填：
+
+```text
+CLASH_SUBSCRIPTION_URL = Clash 订阅链接
+```
+
+Actions 会临时下载订阅并启动 Mihomo，把查询请求转到本地 `http://127.0.0.1:7890`。订阅链接只放 GitHub Secret，不要写进仓库。
+
+Node 运行时已经开启系统代理环境变量支持，会自动读取 Mihomo 本地代理，或手动填写的 `HTTPS_PROXY`、`HTTP_PROXY` 和 `NO_PROXY`。
 
 适合这里的代理需要满足两个条件：
 
 - GitHub Actions 能从公网连上它。
 - 代理出口能访问 `https://icard.njfu.edu.cn/charge-app/` 和 `/charge/feeitem/getThirdData`。
 
-不适合的情况：只开在你电脑上的本地代理、只允许局域网访问的代理、出口也访问不了学校一卡通的海外代理。
+不适合的情况：只开在你电脑上的本地代理、`127.0.0.1`、`192.168.x.x` 这类局域网地址、出口也访问不了学校一卡通的海外代理。
 
 填好代理后，可以手动运行 `Electricity Watch`，把 `diagnose` 输入设成 `true`。它只测试网络，不查询余额、不提交数据。看到 `Open charge API entry: ... payload=yes` 或类似成功结果后，再用默认参数手动运行一次正式查询。
 

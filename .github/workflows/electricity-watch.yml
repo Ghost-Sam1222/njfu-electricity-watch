@@ -17,6 +17,8 @@ permissions:
 jobs:
   query:
     runs-on: ubuntu-latest
+    env:
+      HAS_CLASH_SUBSCRIPTION: ${{ secrets.CLASH_SUBSCRIPTION_URL != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -24,13 +26,20 @@ jobs:
         with:
           node-version: "24"
 
+      - name: Start Mihomo proxy
+        id: mihomo
+        if: ${{ env.HAS_CLASH_SUBSCRIPTION == 'true' }}
+        env:
+          CLASH_SUBSCRIPTION_URL: ${{ secrets.CLASH_SUBSCRIPTION_URL }}
+        run: bash scripts/setup-mihomo.sh
+
       - name: Diagnose network
         if: ${{ inputs.diagnose == 'true' }}
         env:
           NODE_OPTIONS: --use-env-proxy
           SYNJONES_AUTH: ${{ secrets.SYNJONES_AUTH }}
-          HTTPS_PROXY: ${{ secrets.HTTPS_PROXY }}
-          HTTP_PROXY: ${{ secrets.HTTP_PROXY }}
+          HTTPS_PROXY: ${{ steps.mihomo.outputs.proxy || secrets.HTTPS_PROXY }}
+          HTTP_PROXY: ${{ steps.mihomo.outputs.proxy || secrets.HTTP_PROXY }}
           NO_PROXY: ${{ vars.NO_PROXY }}
         run: npm run diagnose
 
@@ -40,8 +49,8 @@ jobs:
           NODE_OPTIONS: --use-env-proxy
           SYNJONES_AUTH: ${{ secrets.SYNJONES_AUTH }}
           BARK_URL: ${{ secrets.BARK_URL }}
-          HTTPS_PROXY: ${{ secrets.HTTPS_PROXY }}
-          HTTP_PROXY: ${{ secrets.HTTP_PROXY }}
+          HTTPS_PROXY: ${{ steps.mihomo.outputs.proxy || secrets.HTTPS_PROXY }}
+          HTTP_PROXY: ${{ steps.mihomo.outputs.proxy || secrets.HTTP_PROXY }}
           NO_PROXY: ${{ vars.NO_PROXY }}
         run: npm run query
 
