@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "discover": "node src/query-electricity.mjs --discover",
+    "diagnose": "node src/diagnose-network.mjs",
     "query": "node src/query-electricity.mjs",
     "export:bills": "node src/export-bills.mjs"
   },

@@ -5,6 +5,11 @@ on:
     # UTC 00:05 / 14:05 = Beijing 08:05 / 22:05.
     - cron: "5 0,14 * * *"
   workflow_dispatch:
+    inputs:
+      diagnose:
+        description: "Only test network access; do not query balances or commit data"
+        required: false
+        default: "false"
 
 permissions:
   contents: write
@@ -19,7 +24,18 @@ jobs:
         with:
           node-version: "24"
 
+      - name: Diagnose network
+        if: ${{ inputs.diagnose == 'true' }}
+        env:
+          NODE_OPTIONS: --use-env-proxy
+          SYNJONES_AUTH: ${{ secrets.SYNJONES_AUTH }}
+          HTTPS_PROXY: ${{ secrets.HTTPS_PROXY }}
+          HTTP_PROXY: ${{ secrets.HTTP_PROXY }}
+          NO_PROXY: ${{ vars.NO_PROXY }}
+        run: npm run diagnose
+
       - name: Query electricity balances
+        if: ${{ inputs.diagnose != 'true' }}
         env:
           NODE_OPTIONS: --use-env-proxy
           SYNJONES_AUTH: ${{ secrets.SYNJONES_AUTH }}
@@ -30,6 +46,7 @@ jobs:
         run: npm run query
 
       - name: Commit updated data
+        if: ${{ inputs.diagnose != 'true' }}
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: update electricity data"

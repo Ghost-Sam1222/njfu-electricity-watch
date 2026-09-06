@@ -21,6 +21,15 @@ HTTPS_PROXY = http://用户名:密码@代理域名:端口
 
 Node 运行时已经开启系统代理环境变量支持，会自动读取 `HTTPS_PROXY`、`HTTP_PROXY` 和 `NO_PROXY`。
 
+适合这里的代理需要满足两个条件：
+
+- GitHub Actions 能从公网连上它。
+- 代理出口能访问 `https://icard.njfu.edu.cn/charge-app/` 和 `/charge/feeitem/getThirdData`。
+
+不适合的情况：只开在你电脑上的本地代理、只允许局域网访问的代理、出口也访问不了学校一卡通的海外代理。
+
+填好代理后，可以手动运行 `Electricity Watch`，把 `diagnose` 输入设成 `true`。它只测试网络，不查询余额、不提交数据。看到 `Open charge API entry: ... payload=yes` 或类似成功结果后，再用默认参数手动运行一次正式查询。
+
 `config/targets.json` 已经按 `10栋717` 配好；除非换宿舍或学校改接口，否则不用碰发现模式。
 
 ## 时间和阈值
