@@ -7,13 +7,39 @@ binary_file="$work_dir/mihomo"
 
 mkdir -p "$work_dir"
 
+download_subscription() {
+  local url="$1"
+  curl -fsSL \
+    -A "ClashforWindows/0.20.39" \
+    -H "Accept: text/yaml,application/yaml,text/plain,*/*" \
+    "$url" \
+    -o "$config_file"
+}
+
 if [[ -z "${CLASH_SUBSCRIPTION_URL:-}" ]]; then
   echo "CLASH_SUBSCRIPTION_URL is empty; skip Mihomo proxy."
   exit 0
 fi
 
 echo "Downloading Clash subscription..."
-curl -fsSL "$CLASH_SUBSCRIPTION_URL" -o "$config_file"
+if ! download_subscription "$CLASH_SUBSCRIPTION_URL"; then
+  echo "Primary subscription URL failed; trying embedded provider URL..."
+  embedded_url="$(
+    SUBSCRIPTION_URL="$CLASH_SUBSCRIPTION_URL" node -e '
+      const url = new URL(process.env.SUBSCRIPTION_URL);
+      console.log(url.searchParams.get("url") || "");
+    '
+  )"
+  if [[ -z "$embedded_url" ]] || ! download_subscription "$embedded_url"; then
+    echo "Unable to download Clash subscription."
+    exit 1
+  fi
+fi
+
+if ! grep -Eq '^(proxies|proxy-providers|proxy-groups|mixed-port|port|socks-port):' "$config_file"; then
+  echo "Downloaded subscription does not look like a Clash YAML config."
+  exit 1
+fi
 
 tmp_config="$work_dir/config.normalized.yaml"
 awk '!/^(mixed-port|allow-lan|bind-address|mode|log-level|external-controller|secret):/' "$config_file" > "$tmp_config"
