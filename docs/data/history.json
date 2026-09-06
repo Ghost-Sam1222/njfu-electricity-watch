@@ -4,10 +4,10 @@
     "id": "lighting",
     "name": "本部研楼及9-13栋照明/插座",
     "feeitemid": 489,
-    "kwh": 10717,
+    "kwh": 205.29,
     "estimatedKwh": null,
     "amount": null,
-    "summary": "10717 度",
+    "summary": "205.29 度",
     "alerts": [],
     "usageInterval": null
   },

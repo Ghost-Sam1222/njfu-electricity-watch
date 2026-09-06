@@ -21,16 +21,20 @@ export function parseNumber(value) {
 
 export function extractMetrics(showData, options = {}) {
   const entries = flattenShowData(showData);
-  const metrics = { raw: showData, entries };
+  const metrics = options.storeRaw ? { raw: showData, entries } : {};
 
   for (const entry of entries) {
     const key = String(entry.key);
     const valueText = String(entry.value ?? '');
-    const number = parseNumber(entry.value);
-    if (number === null) continue;
     const probe = `${key} ${valueText}`;
-    if (metrics.kwh === undefined && KWH_KEYS.test(probe)) metrics.kwh = number;
-    if (metrics.amount === undefined && AMOUNT_KEYS.test(probe)) metrics.amount = number;
+    if (metrics.kwh === undefined && KWH_KEYS.test(probe)) {
+      const number = parseKwhNumber(probe);
+      if (number !== null) metrics.kwh = number;
+    }
+    if (metrics.amount === undefined && AMOUNT_KEYS.test(probe)) {
+      const number = parseAmountNumber(probe);
+      if (number !== null) metrics.amount = number;
+    }
   }
 
   if (metrics.kwh === undefined && metrics.amount !== undefined && options.kwhPrice) {
@@ -38,6 +42,24 @@ export function extractMetrics(showData, options = {}) {
   }
 
   return metrics;
+}
+
+function parseKwhNumber(value) {
+  const text = String(value ?? '').replace(/,/g, '');
+  const preferred = text.match(/(?:剩余电量|剩余用电|剩余电|电量|度数|kwh|quantity|power|remain)[^\d-]*(-?\d+(?:\.\d+)?)/i);
+  if (preferred) return Number(preferred[1]);
+  const unit = text.match(/(-?\d+(?:\.\d+)?)\s*(?:度|kwh|千瓦时)/i);
+  if (unit) return Number(unit[1]);
+  return parseNumber(text);
+}
+
+function parseAmountNumber(value) {
+  const text = String(value ?? '').replace(/,/g, '');
+  const preferred = text.match(/(?:余额|金额|剩余金额|可用金额|balance|amount|money)[^\d-]*(-?\d+(?:\.\d+)?)/i);
+  if (preferred) return Number(preferred[1]);
+  const unit = text.match(/(-?\d+(?:\.\d+)?)\s*(?:元|rmb|cny)/i);
+  if (unit) return Number(unit[1]);
+  return parseNumber(text);
 }
 
 export function evaluateThreshold(target, metrics) {

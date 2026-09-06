@@ -60,16 +60,17 @@ async function queryTarget(client, target, defaults) {
   const metrics = extractMetrics(showData, defaults);
   const alerts = evaluateThreshold(target, metrics);
 
-  return {
+  const result = {
     id: target.id,
     name: target.name,
     feeitemid: target.feeitemid,
     metrics,
     summary: summarizeMetrics(metrics),
     alerts,
-    queryParams: redactQueryParams(params, defaults),
-    raw: map
+    queryParams: redactQueryParams(params, defaults)
   };
+  if (defaults.storeRaw) result.raw = map;
+  return result;
 }
 
 async function buildQueryParams(client, target, defaults) {
