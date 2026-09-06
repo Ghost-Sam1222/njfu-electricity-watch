@@ -156,7 +156,10 @@ function findChoice(choices, selector) {
 }
 
 function normalizeText(value) {
-  return String(value ?? '').replace(/\s+/g, '').toLowerCase();
+  return String(value ?? '')
+    .replace(/\s+/g, '')
+    .replace(/[栋幢]/g, '栋')
+    .toLowerCase();
 }
 
 function redactQueryParams(params, defaults) {
