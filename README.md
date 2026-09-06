@@ -1,12 +1,25 @@
 # 南林电力守夜
 
-南京林业大学一卡通电费余额监控、Bark 预警、GitHub Pages 看板和账单导出脚手架。
+南京林业大学一卡通电费余额监控、Bark 预警、静态看板和账单导出脚手架。
 
-## 你现在只要做三件事
+## 第一阶段目标
 
-1. 把这个目录推到一个 GitHub 仓库。
-2. 在仓库 Settings → Secrets and variables → Actions 里加两个 Secrets：`SYNJONES_AUTH` 和 `BARK_URL`。
-3. 在仓库 Settings → Pages 里选择 GitHub Actions 部署，然后手动运行一次 `Electricity Watch`。
+先跑通 GitHub Actions 自动查询和 Bark 预警。看板文件已经在 `docs/`，但私有仓库的 GitHub Pages 可能受账号计划限制，后面第二阶段再接 GitHub Pages 或 Cloudflare。
+
+仓库里需要两个 Secrets：
+
+```text
+SYNJONES_AUTH = 一卡通 URL 里的 synjones-auth 令牌，可以带 bearer，也可以只填 token
+BARK_URL = 你的 Bark 推送 URL
+```
+
+如果 GitHub Actions 访问学校一卡通接口超时，再加一个可从 GitHub 云端访问的代理 Secret：
+
+```text
+HTTPS_PROXY = http://用户名:密码@代理域名:端口
+```
+
+Node 运行时已经开启系统代理环境变量支持，会自动读取 `HTTPS_PROXY`、`HTTP_PROXY` 和 `NO_PROXY`。
 
 `config/targets.json` 已经按 `10栋717` 配好；除非换宿舍或学校改接口，否则不用碰发现模式。
 
@@ -51,7 +64,7 @@ SYNJONES_AUTH = 一卡通 URL 里的 synjones-auth 令牌，可以带 bearer，�
 BARK_URL = 你的 Bark 推送 URL
 ```
 
-再设置 Variables：
+第二阶段启用公开看板时，再设置 Variables：
 
 ```text
 PAGES_BASE_URL = 你的 GitHub Pages 地址，例如 https://<user>.github.io/<repo>

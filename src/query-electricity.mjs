@@ -313,7 +313,29 @@ function parseArgs(argv) {
   return args;
 }
 
-main().catch(error => {
+main().catch(async error => {
   console.error(error.stack || error.message);
+  await notifyFailureBark(error).catch(notifyError => {
+    console.error(`Bark failure notification skipped: ${notifyError.message}`);
+  });
   process.exitCode = 1;
 });
+
+async function notifyFailureBark(error) {
+  const barkUrl = process.env.BARK_URL;
+  if (!barkUrl) return;
+
+  const title = '南林电力守夜查询失败';
+  const body = [
+    '自动查询没有成功，本次电量状态未知。',
+    `原因：${error.message || '未知错误'}`,
+    '如果连续出现，请检查一卡通登录状态或 GitHub Actions 访问学校系统的网络路径。'
+  ].join('\n');
+  const url = new URL(encodeURIComponent(title) + '/' + encodeURIComponent(body), ensureSlash(barkUrl));
+  url.searchParams.set('group', process.env.BARK_GROUP || '南林电力守夜');
+  url.searchParams.set('sound', process.env.BARK_SOUND || 'alarm');
+  url.searchParams.set('level', 'timeSensitive');
+
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Bark notification failed: ${response.status} ${response.statusText}`);
+}
