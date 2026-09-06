@@ -42,7 +42,12 @@ export function createCasClient(options = {}) {
       }
     }
 
-    const response = await fetch(url, { method, headers, body: payload });
+    let response;
+    try {
+      response = await fetch(url, { method, headers, body: payload });
+    } catch (error) {
+      throw new Error(`CAS network request failed: ${method} ${url.pathname} (${describeNetworkError(error)})`, { cause: error });
+    }
     const text = await response.text();
     const data = parseResponse(text);
     if (!response.ok) {
@@ -70,6 +75,18 @@ function parseResponse(text) {
   } catch {
     return text;
   }
+}
+
+function describeNetworkError(error) {
+  const cause = error?.cause || error;
+  const details = [
+    cause?.code,
+    cause?.errno,
+    cause?.syscall,
+    cause?.hostname,
+    cause?.message
+  ].filter(Boolean);
+  return details.length ? details.join(' ') : error?.message || 'unknown network error';
 }
 
 export function assertCasOk(data, context) {
