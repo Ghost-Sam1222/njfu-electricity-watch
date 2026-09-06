@@ -1,4 +1,96 @@
 {
-  "updatedAt": null,
-  "targets": []
+  "updatedAt": "2026-09-06T01:54:32.815Z",
+  "targets": [
+    {
+      "checkedAt": "2026-09-06T01:54:32.815Z",
+      "id": "lighting",
+      "name": "本部研楼及9-13栋照明/插座",
+      "feeitemid": 489,
+      "metrics": {
+        "raw": {
+          "信息": "房间号:10717，剩余电量205.29度"
+        },
+        "entries": [
+          {
+            "key": "信息",
+            "value": "房间号:10717，剩余电量205.29度"
+          }
+        ],
+        "kwh": 10717
+      },
+      "summary": "10717 度",
+      "alerts": [],
+      "queryParams": {
+        "type": "IEC",
+        "campus": "主校区&主校区",
+        "building": "04&学生公寓10幢",
+        "room": "***room***",
+        "level": 3,
+        "feeitemid": 489
+      },
+      "raw": {
+        "showData": {
+          "信息": "房间号:10717，剩余电量205.29度"
+        },
+        "data": {
+          "area": "主校区",
+          "buildingName": "学生公寓10幢",
+          "areaName": "主校区",
+          "floorName": "",
+          "floor": "",
+          "aid": "0030000000003801",
+          "account": "89911",
+          "building": "04",
+          "room": "10717",
+          "roomName": ""
+        }
+      }
+    },
+    {
+      "checkedAt": "2026-09-06T01:54:32.815Z",
+      "id": "ac",
+      "name": "本部其他公寓空调",
+      "feeitemid": 528,
+      "metrics": {
+        "raw": {
+          "信息": "当前剩余电量为192.30度"
+        },
+        "entries": [
+          {
+            "key": "信息",
+            "value": "当前剩余电量为192.30度"
+          }
+        ],
+        "kwh": 192.3
+      },
+      "summary": "192.3 度",
+      "alerts": [],
+      "queryParams": {
+        "type": "IEC",
+        "campus": "1&本部校区",
+        "building": "2373&10栋空调",
+        "room": "***room***",
+        "level": 3,
+        "feeitemid": 528
+      },
+      "raw": {
+        "showData": {
+          "信息": "当前剩余电量为192.30度"
+        },
+        "data": {
+          "area": "1",
+          "buildingName": "10栋空调",
+          "areaName": "本部校区",
+          "floorName": "",
+          "floor": "",
+          "aid": "0030000000002501",
+          "account": "89911",
+          "building": "2373",
+          "room": "10717",
+          "roomName": ""
+        }
+      }
+    }
+  ],
+  "alerts": []
 }
