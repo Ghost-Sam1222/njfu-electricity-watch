@@ -26,16 +26,31 @@ permissions:
 jobs:
   export:
     runs-on: ubuntu-latest
+    env:
+      HAS_CLASH_CONFIG: ${{ secrets.CLASH_CONFIG_YAML != '' }}
+      HAS_CLASH_SUBSCRIPTION: ${{ secrets.CLASH_SUBSCRIPTION_URL != '' }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
+
+      - name: Start Mihomo proxy
+        id: mihomo
+        if: ${{ env.HAS_CLASH_CONFIG == 'true' || env.HAS_CLASH_SUBSCRIPTION == 'true' }}
+        env:
+          CLASH_CONFIG_YAML: ${{ secrets.CLASH_CONFIG_YAML }}
+          CLASH_SUBSCRIPTION_URL: ${{ secrets.CLASH_SUBSCRIPTION_URL }}
+        run: bash scripts/setup-mihomo.sh
 
       - name: Export bills
         env:
+          NODE_OPTIONS: --use-env-proxy
           SYNJONES_AUTH: ${{ secrets.SYNJONES_AUTH }}
+          HTTPS_PROXY: ${{ steps.mihomo.outputs.proxy || secrets.HTTPS_PROXY }}
+          HTTP_PROXY: ${{ steps.mihomo.outputs.proxy || secrets.HTTP_PROXY }}
+          NO_PROXY: ${{ vars.NO_PROXY }}
         run: |
           args=(--kind "${{ inputs.kind }}")
           if [ -n "${{ inputs.from }}" ]; then args+=(--from "${{ inputs.from }}"); fi

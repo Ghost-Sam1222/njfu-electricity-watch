@@ -8,6 +8,7 @@ Never commit or publish:
 - `BARK_URL` or Bark device key
 - Clash/Mihomo subscriptions
 - Clash/Mihomo YAML configs with proxy nodes
+- exported bill files under `exports/`
 - GitHub Actions logs copied with unmasked secrets
 
 Proxy subscription URLs and generated Clash/Mihomo configs may contain paid service credentials. Store them only in GitHub Actions Secrets, such as `CLASH_CONFIG_YAML` or `CLASH_SUBSCRIPTION_URL`.

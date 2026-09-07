@@ -29,7 +29,8 @@ async function main() {
   const outDir = args.outDir || 'exports/bills';
   await mkdir(outDir, { recursive: true });
   const stamp = new Date().toISOString().slice(0, 10);
-  const basename = `${kind}-bills-${args.from || 'start'}_${args.to || stamp}`;
+  const scope = kind === 'electricity' && args.feeitemid ? `-${args.feeitemid}` : '';
+  const basename = `${kind}${scope}-bills-${args.from || 'start'}_${args.to || stamp}`;
   const jsonPath = path.join(outDir, `${basename}.json`);
   const csvPath = path.join(outDir, `${basename}.csv`);
   await writeFile(jsonPath, `${JSON.stringify(rows, null, 2)}\n`);
