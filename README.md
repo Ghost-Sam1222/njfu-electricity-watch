@@ -135,7 +135,9 @@ npm run export:bills -- --kind card --from 2026-09-01 --to 2026-09-30
 npm run export:bills -- --kind electricity --feeitemid 489 --from 2026-09-01 --to 2026-09-30
 ```
 
-结果会写入 `exports/bills/*.json` 和 `exports/bills/*.csv`。
+结果会写入 `exports/bills/*.xlsx`、`exports/bills/*.json` 和 `exports/bills/*.csv`。
+
+实际阅读和做账优先使用 `exports/bills/*.xlsx`。Excel 直接打开 CSV 容易出现中文编码和列宽问题；CSV 只作为兼容备份保留。
 
 ## 接口依据
 

@@ -1,11 +1,31 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { createCasClient, assertCasOk } from './casClient.mjs';
+import { writeXlsx } from './xlsxWriter.mjs';
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  const client = createCasClient({ baseUrl: args.baseUrl, token: args.token, source: args.kind === 'card' ? 'h5' : 'pc' });
   const kind = args.kind || 'card';
+  const rows = args.inputJson
+    ? JSON.parse(await readFile(args.inputJson, 'utf8'))
+    : await fetchRows(args, kind);
+
+  const outDir = args.outDir || 'exports/bills';
+  await mkdir(outDir, { recursive: true });
+  const stamp = new Date().toISOString().slice(0, 10);
+  const scope = kind === 'electricity' && args.feeitemid ? `-${args.feeitemid}` : '';
+  const basename = `${kind}${scope}-bills-${args.from || 'start'}_${args.to || stamp}`;
+  const jsonPath = path.join(outDir, `${basename}.json`);
+  const csvPath = path.join(outDir, `${basename}.csv`);
+  const xlsxPath = path.join(outDir, `${basename}.xlsx`);
+  await writeFile(jsonPath, `${JSON.stringify(rows, null, 2)}\n`);
+  await writeFile(csvPath, toCsv(rows), 'utf8');
+  await writeXlsx(rows, xlsxPath, { kind });
+  console.log(JSON.stringify({ kind, count: rows.length, jsonPath, csvPath, xlsxPath }, null, 2));
+}
+
+async function fetchRows(args, kind) {
+  const client = createCasClient({ baseUrl: args.baseUrl, token: args.token, source: kind === 'card' ? 'h5' : 'pc' });
   const pageSize = Number(args.size || 100);
   const params = { ...args.params, size: pageSize, current: 1 };
 
@@ -25,17 +45,7 @@ async function main() {
     if (!pageRows.length || rows.length >= total) break;
     params.current += 1;
   }
-
-  const outDir = args.outDir || 'exports/bills';
-  await mkdir(outDir, { recursive: true });
-  const stamp = new Date().toISOString().slice(0, 10);
-  const scope = kind === 'electricity' && args.feeitemid ? `-${args.feeitemid}` : '';
-  const basename = `${kind}${scope}-bills-${args.from || 'start'}_${args.to || stamp}`;
-  const jsonPath = path.join(outDir, `${basename}.json`);
-  const csvPath = path.join(outDir, `${basename}.csv`);
-  await writeFile(jsonPath, `${JSON.stringify(rows, null, 2)}\n`);
-  await writeFile(csvPath, toCsv(rows));
-  console.log(JSON.stringify({ kind, count: rows.length, jsonPath, csvPath }, null, 2));
+  return rows;
 }
 
 function extractRows(response) {
@@ -64,14 +74,14 @@ function extractTotal(response, fallback) {
 }
 
 function toCsv(rows) {
-  if (!rows.length) return '';
+  if (!rows.length) return '\ufeff';
   const keys = Array.from(new Set(rows.flatMap(row => Object.keys(flatten(row)))));
   const lines = [keys.join(',')];
   for (const row of rows) {
     const flat = flatten(row);
     lines.push(keys.map(key => csvCell(flat[key])).join(','));
   }
-  return `${lines.join('\n')}\n`;
+  return `\ufeff${lines.join('\n')}\n`;
 }
 
 function flatten(obj, prefix = '') {
@@ -98,6 +108,7 @@ function parseArgs(argv) {
     else if (arg === '--feeitemid') args.feeitemid = argv[++i];
     else if (arg === '--size') args.size = argv[++i];
     else if (arg === '--out-dir') args.outDir = argv[++i];
+    else if (arg === '--input-json') args.inputJson = argv[++i];
     else if (arg === '--base-url') args.baseUrl = argv[++i];
     else if (arg === '--token') args.token = argv[++i];
     else if (arg === '--param') {
