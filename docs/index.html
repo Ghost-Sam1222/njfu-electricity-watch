@@ -22,16 +22,27 @@
     <main>
       <section class="balance-grid" id="balances"></section>
 
-      <section class="panel usage-panel">
-        <div class="panel-head">
-          <h2>日耗统计</h2>
-          <div class="legend">
-            <span><i class="legend-dot lighting"></i>照明</span>
-            <span><i class="legend-dot ac"></i>空调</span>
+      <section class="usage-grid">
+        <article class="panel usage-panel">
+          <div class="panel-head">
+            <h2>日耗趋势</h2>
+            <div class="legend">
+              <span><i class="legend-dot lighting"></i>照明</span>
+              <span><i class="legend-dot ac"></i>空调</span>
+            </div>
           </div>
-        </div>
-        <canvas id="dailyChart" height="320"></canvas>
-        <div class="daily-summary" id="dailySummary"></div>
+          <canvas id="dailyLineChart" height="300"></canvas>
+          <div class="daily-summary" id="dailySummary"></div>
+        </article>
+
+        <article class="panel usage-panel">
+          <div class="panel-head">
+            <h2>用电占比</h2>
+            <p class="panel-note">最近 14 天</p>
+          </div>
+          <canvas id="usagePieChart" height="300"></canvas>
+          <div class="daily-summary" id="pieSummary"></div>
+        </article>
       </section>
     </main>
 

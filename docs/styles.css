@@ -215,6 +215,18 @@ main {
   font-size: 1.1rem;
 }
 
+.panel-note {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.usage-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.85fr);
+  gap: 18px;
+}
+
 .legend {
   display: flex;
   align-items: center;
@@ -247,6 +259,7 @@ main {
 canvas {
   width: 100%;
   max-width: 100%;
+  display: block;
 }
 
 .daily-summary {
@@ -308,6 +321,7 @@ canvas {
   }
 
   .balance-grid,
+  .usage-grid,
   .usage-stats {
     grid-template-columns: 1fr;
   }

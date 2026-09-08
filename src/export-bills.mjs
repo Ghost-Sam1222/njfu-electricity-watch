@@ -14,14 +14,14 @@ async function main() {
   await mkdir(outDir, { recursive: true });
   const stamp = new Date().toISOString().slice(0, 10);
   const scope = kind === 'electricity' && args.feeitemid ? `-${args.feeitemid}` : '';
-  const basename = `${kind}${scope}-bills-${args.from || 'start'}_${args.to || stamp}`;
+  const basename = args.inputJson
+    ? path.basename(args.inputJson, '.json')
+    : `${kind}${scope}-bills-${args.from || 'start'}_${args.to || stamp}`;
   const jsonPath = path.join(outDir, `${basename}.json`);
-  const csvPath = path.join(outDir, `${basename}.csv`);
   const xlsxPath = path.join(outDir, `${basename}.xlsx`);
   await writeFile(jsonPath, `${JSON.stringify(rows, null, 2)}\n`);
-  await writeFile(csvPath, toCsv(rows), 'utf8');
   await writeXlsx(rows, xlsxPath, { kind });
-  console.log(JSON.stringify({ kind, count: rows.length, jsonPath, csvPath, xlsxPath }, null, 2));
+  console.log(JSON.stringify({ kind, count: rows.length, jsonPath, xlsxPath }, null, 2));
 }
 
 async function fetchRows(args, kind) {
@@ -71,31 +71,6 @@ function extractTotal(response, fallback) {
     response.data?.count ??
     fallback
   );
-}
-
-function toCsv(rows) {
-  if (!rows.length) return '\ufeff';
-  const keys = Array.from(new Set(rows.flatMap(row => Object.keys(flatten(row)))));
-  const lines = [keys.join(',')];
-  for (const row of rows) {
-    const flat = flatten(row);
-    lines.push(keys.map(key => csvCell(flat[key])).join(','));
-  }
-  return `\ufeff${lines.join('\n')}\n`;
-}
-
-function flatten(obj, prefix = '') {
-  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return { [prefix || 'value']: obj };
-  return Object.fromEntries(Object.entries(obj).flatMap(([key, value]) => {
-    const next = prefix ? `${prefix}.${key}` : key;
-    if (value && typeof value === 'object' && !Array.isArray(value)) return Object.entries(flatten(value, next));
-    return [[next, value]];
-  }));
-}
-
-function csvCell(value) {
-  const text = value === undefined || value === null ? '' : String(value);
-  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
 function parseArgs(argv) {

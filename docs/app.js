@@ -101,8 +101,10 @@ function renderBalances() {
 
 function renderDailyUsage() {
   const rows = buildDailyUsage(state.history);
-  drawDailyChart(document.getElementById('dailyChart'), rows);
+  drawDailyLineChart(document.getElementById('dailyLineChart'), rows);
+  drawUsagePieChart(document.getElementById('usagePieChart'), rows);
   renderDailySummary(rows);
+  renderPieSummary(rows);
 }
 
 function displayRemaining(metrics = {}) {
@@ -187,7 +189,7 @@ function annotateAnomalies(rows) {
   }
 }
 
-function drawDailyChart(canvas, rows) {
+function drawDailyLineChart(canvas, rows) {
   drawChartBase(canvas, ctx => {
     const { w, h, x0, y0, plotW, plotH } = dims(canvas);
     drawGrid(ctx, x0, y0, plotW, plotH);
@@ -196,29 +198,100 @@ function drawDailyChart(canvas, rows) {
     const dates = Array.from(new Set(rows.map(row => row.date))).slice(-14);
     const visible = rows.filter(row => dates.includes(row.date));
     const max = Math.max(...visible.map(row => row.usage), 1);
-    const groupGap = 14;
-    const innerGap = 5;
-    const groupW = (plotW - groupGap * Math.max(0, dates.length - 1)) / Math.max(dates.length, 1);
-    const barW = Math.max(8, (groupW - innerGap) / TARGETS.length);
 
-    dates.forEach((date, dateIndex) => {
-      TARGETS.forEach((meta, targetIndex) => {
+    TARGETS.forEach(meta => {
+      const points = dates.map((date, index) => {
         const row = visible.find(item => item.date === date && item.targetId === meta.id);
-        if (!row) return;
-        const height = scale(row.usage, 0, max, plotH);
-        const x = x0 + dateIndex * (groupW + groupGap) + targetIndex * (barW + innerGap);
-        const y = y0 + plotH - height;
-        ctx.fillStyle = meta.color;
-        ctx.fillRect(x, y, barW, height);
-        if (row.anomaly) {
+        if (!row) return null;
+        const x = dates.length === 1 ? x0 + plotW / 2 : x0 + plotW * index / (dates.length - 1);
+        const y = y0 + plotH - scale(row.usage, 0, max, plotH);
+        return { x, y, row };
+      }).filter(Boolean);
+
+      if (!points.length) return;
+      ctx.strokeStyle = meta.color;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      points.forEach((point, index) => {
+        if (index === 0) ctx.moveTo(point.x, point.y);
+        else ctx.lineTo(point.x, point.y);
+      });
+      ctx.stroke();
+
+      points.forEach(point => {
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = meta.color;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        if (point.row.anomaly) {
           ctx.strokeStyle = colors.critical;
           ctx.lineWidth = 2;
-          ctx.strokeRect(x - 2, y - 2, barW + 4, height + 4);
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, 8, 0, Math.PI * 2);
+          ctx.stroke();
         }
       });
     });
 
-    drawAxisLabels(ctx, w, h);
+    drawLineAxisLabels(ctx, dates, w, h);
+  });
+}
+
+function drawUsagePieChart(canvas, rows) {
+  drawChartBase(canvas, ctx => {
+    const { w, h } = canvasDims(canvas);
+    const totals = usageTotals(rows);
+    const total = totals.reduce((sum, item) => sum + item.usage, 0);
+    if (total <= 0) return drawEmpty(ctx, canvas, '第二次采集后开始生成占比');
+
+    const radius = Math.min(92, w * 0.24, h * 0.32);
+    const cx = w < 560 ? w / 2 : w * 0.35;
+    const cy = h * 0.48;
+    let start = -Math.PI / 2;
+
+    totals.forEach(item => {
+      const angle = item.usage / total * Math.PI * 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, radius, start, start + angle);
+      ctx.closePath();
+      ctx.fillStyle = item.meta.color;
+      ctx.fill();
+      start += angle;
+    });
+
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius * 0.56, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = colors.muted;
+    ctx.font = '12px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('合计', cx, cy - 8);
+    ctx.fillStyle = '#18212f';
+    ctx.font = '700 18px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
+    ctx.fillText(`${formatNumber(total)} 度`, cx, cy + 18);
+
+    const legendX = w < 560 ? 24 : w * 0.64;
+    const legendY = w < 560 ? cy + radius + 34 : cy - 42;
+    ctx.textAlign = 'left';
+    totals.forEach((item, index) => {
+      const y = legendY + index * 34;
+      ctx.fillStyle = item.meta.color;
+      ctx.beginPath();
+      ctx.arc(legendX, y - 4, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#18212f';
+      ctx.font = '700 13px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
+      ctx.fillText(item.meta.title.replace('用电剩余', ''), legendX + 14, y);
+      ctx.fillStyle = colors.muted;
+      ctx.font = '12px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
+      ctx.fillText(`${formatNumber(item.usage)} 度 · ${Math.round(item.usage / total * 100)}%`, legendX + 14, y + 17);
+    });
   });
 }
 
@@ -259,6 +332,29 @@ function renderDailySummary(rows) {
   `;
 }
 
+function renderPieSummary(rows) {
+  const root = document.getElementById('pieSummary');
+  const totals = usageTotals(rows);
+  const total = totals.reduce((sum, item) => sum + item.usage, 0);
+  if (total <= 0) {
+    root.innerHTML = '<p class="empty">需要至少两次成功查询，才能计算占比。</p>';
+    return;
+  }
+
+  root.innerHTML = `
+    <div class="usage-stats">
+      ${totals.map(item => `
+        <div class="usage-stat">
+          <span class="legend-dot" style="background: ${item.meta.color}"></span>
+          <strong>${escapeHtml(item.meta.title.replace('用电剩余', ''))}</strong>
+          <span>${formatNumber(item.usage)} 度</span>
+          <span>${Math.round(item.usage / total * 100)}%</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
 function drawChartBase(canvas, draw) {
   const ratio = window.devicePixelRatio || 1;
   const rect = canvas.getBoundingClientRect();
@@ -288,11 +384,33 @@ function drawGrid(ctx, x, y, w, h) {
   }
 }
 
-function drawAxisLabels(ctx, w, h) {
+function drawLineAxisLabels(ctx, dates, w, h) {
   ctx.fillStyle = colors.muted;
   ctx.font = '12px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
   ctx.fillText('度/日', 44, h - 14);
-  ctx.fillText('最近 14 天', w - 92, h - 14);
+  const text = dates.length > 1
+    ? `${dates[0].slice(5)} 至 ${dates.at(-1).slice(5)}`
+    : dates[0]?.slice(5) || '最近 14 天';
+  ctx.fillText(text, Math.max(44, w - 116), h - 14);
+}
+
+function canvasDims(canvas) {
+  return {
+    w: canvas.clientWidth,
+    h: Number(canvas.getAttribute('height'))
+  };
+}
+
+function usageTotals(rows) {
+  const dates = Array.from(new Set(rows.map(row => row.date))).slice(-14);
+  const visible = rows.filter(row => dates.includes(row.date));
+  return TARGETS.map(meta => ({
+    meta,
+    usage: Number(visible
+      .filter(row => row.targetId === meta.id)
+      .reduce((sum, row) => sum + row.usage, 0)
+      .toFixed(2))
+  }));
 }
 
 function drawEmpty(ctx, canvas, text) {
