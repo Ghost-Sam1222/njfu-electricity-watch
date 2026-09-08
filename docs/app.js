@@ -18,7 +18,9 @@ const TARGETS = [
 const state = {
   latest: null,
   history: [],
-  rangeDays: 14
+  rangeDays: 14,
+  chartPoints: [],
+  selectedPoint: null
 };
 
 const colors = {
@@ -34,8 +36,11 @@ Promise.all([
 ]).then(([latest, history]) => {
   state.latest = latest;
   state.history = Array.isArray(history) ? history : [];
+  initChartInteraction();
   document.getElementById('rangeDays').addEventListener('change', event => {
     state.rangeDays = Number(event.target.value) === 7 ? 7 : 14;
+    state.selectedPoint = null;
+    hideChartTooltip();
     document.getElementById('rangeNote').textContent = `最近 ${state.rangeDays} 天`;
     renderDailyUsage();
   });
@@ -202,6 +207,7 @@ function annotateAnomalies(rows) {
 }
 
 function drawDailyLineChart(canvas, rows) {
+  state.chartPoints = [];
   drawChartBase(canvas, ctx => {
     const { w, h, x0, y0, plotW, plotH } = dims(canvas);
     if (!rows.length) return drawEmpty(ctx, canvas, '第二次采集后开始生成日耗');
@@ -217,10 +223,11 @@ function drawDailyLineChart(canvas, rows) {
         if (!row) return null;
         const x = dates.length === 1 ? x0 + plotW / 2 : x0 + plotW * index / (dates.length - 1);
         const y = y0 + plotH - scale(row.usage, 0, max, plotH);
-        return { x, y, row };
+        return { x, y, row, key: pointKey(row) };
       }).filter(Boolean);
 
       if (!points.length) return;
+      state.chartPoints.push(...points);
       ctx.strokeStyle = meta.color;
       ctx.lineWidth = 2.5;
       ctx.beginPath();
@@ -244,6 +251,9 @@ function drawDailyLineChart(canvas, rows) {
           ctx.beginPath();
           ctx.arc(point.x, point.y, 8, 0, Math.PI * 2);
           ctx.stroke();
+        }
+        if (point.row.anomaly || point.key === state.selectedPoint) {
+          drawPointLabel(ctx, point, meta.color);
         }
       });
     });
@@ -348,6 +358,76 @@ function renderPieSummary(rows) {
       `).join('')}
     </div>
   `;
+}
+
+function initChartInteraction() {
+  const canvas = document.getElementById('dailyLineChart');
+  canvas.addEventListener('pointermove', event => {
+    const point = nearestChartPoint(canvas, event);
+    if (!point) {
+      hideChartTooltip();
+      return;
+    }
+    showChartTooltip(canvas, point);
+  });
+  canvas.addEventListener('pointerleave', () => {
+    if (!state.selectedPoint) hideChartTooltip();
+  });
+  canvas.addEventListener('click', event => {
+    const point = nearestChartPoint(canvas, event);
+    state.selectedPoint = point?.key || null;
+    if (point) showChartTooltip(canvas, point);
+    else hideChartTooltip();
+    renderDailyUsage();
+  });
+}
+
+function nearestChartPoint(canvas, event) {
+  if (!state.chartPoints.length) return null;
+  const rect = canvas.getBoundingClientRect();
+  const x = (event.clientX - rect.left) * canvas.clientWidth / rect.width;
+  const y = (event.clientY - rect.top) * chartHeight(canvas) / rect.height;
+  return state.chartPoints
+    .map(point => ({ point, distance: Math.hypot(point.x - x, point.y - y) }))
+    .filter(item => item.distance <= 18)
+    .sort((a, b) => a.distance - b.distance)[0]?.point || null;
+}
+
+function showChartTooltip(canvas, point) {
+  const tooltip = document.getElementById('chartTooltip');
+  const meta = TARGETS.find(item => item.id === point.row.targetId);
+  tooltip.innerHTML = `<strong>${escapeHtml(point.row.date)} · ${escapeHtml(meta?.title || point.row.targetId)}</strong>${formatNumber(point.row.usage)} 度`;
+  tooltip.hidden = false;
+  const left = Math.max(6, Math.min(canvas.clientWidth - tooltip.offsetWidth - 6, point.x + 10));
+  const top = Math.max(38, point.y - 8);
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top = `${top}px`;
+}
+
+function hideChartTooltip() {
+  document.getElementById('chartTooltip').hidden = true;
+}
+
+function pointKey(row) {
+  return `${row.targetId}:${row.date}`;
+}
+
+function drawPointLabel(ctx, point, color) {
+  const text = `${formatNumber(point.row.usage)} 度`;
+  ctx.font = '700 11px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
+  const width = ctx.measureText(text).width + 10;
+  const x = Math.max(width / 2 + 2, Math.min(point.x, ctx.canvas.clientWidth - width / 2 - 2));
+  const y = Math.max(15, point.y - 12);
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(x - width / 2, y - 11, width, 17, 4);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.textAlign = 'center';
+  ctx.fillText(text, x, y + 1);
 }
 
 function drawChartBase(canvas, draw) {
