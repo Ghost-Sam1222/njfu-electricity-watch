@@ -12,7 +12,7 @@ async function main() {
 
   const outDir = args.outDir || 'exports/bills';
   await mkdir(outDir, { recursive: true });
-  const stamp = new Date().toISOString().slice(0, 10);
+  const stamp = chinaDateStamp();
   const scope = kind === 'electricity' && args.feeitemid ? `-${args.feeitemid}` : '';
   const basename = args.inputJson
     ? path.basename(args.inputJson, '.json')
@@ -30,7 +30,8 @@ async function fetchRows(args, kind) {
   const params = { ...args.params, size: pageSize, current: 1 };
 
   if (args.from) params.timeFrom = args.from;
-  if (args.to) params.timeTo = args.to;
+  // Make the API's implicit end date explicit in Beijing time.
+  params.timeTo = args.to || chinaDateStamp();
   if (args.feeitemid) params.feeitemid = args.feeitemid;
 
   const rows = [];
@@ -46,6 +47,15 @@ async function fetchRows(args, kind) {
     params.current += 1;
   }
   return rows;
+}
+
+function chinaDateStamp(date = new Date()) {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Shanghai',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(date);
 }
 
 function extractRows(response) {
