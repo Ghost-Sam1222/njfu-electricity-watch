@@ -17,7 +17,8 @@ const TARGETS = [
 
 const state = {
   latest: null,
-  history: []
+  history: [],
+  rangeDays: 14
 };
 
 const colors = {
@@ -33,6 +34,11 @@ Promise.all([
 ]).then(([latest, history]) => {
   state.latest = latest;
   state.history = Array.isArray(history) ? history : [];
+  document.getElementById('rangeDays').addEventListener('change', event => {
+    state.rangeDays = Number(event.target.value) === 7 ? 7 : 14;
+    document.getElementById('rangeNote').textContent = `最近 ${state.rangeDays} 天`;
+    renderDailyUsage();
+  });
   render();
 });
 
@@ -100,7 +106,7 @@ function renderBalances() {
 }
 
 function renderDailyUsage() {
-  const rows = buildDailyUsage(state.history);
+  const rows = filterUsageRange(buildDailyUsage(state.history), state.rangeDays);
   drawDailyLineChart(document.getElementById('dailyLineChart'), rows);
   drawUsagePieChart(document.getElementById('usagePieChart'), rows);
   renderDailySummary(rows);
@@ -165,7 +171,13 @@ function buildDailyUsage(history) {
     .sort((a, b) => a.date.localeCompare(b.date));
 
   annotateAnomalies(rows);
-  return rows.slice(-42);
+  return rows;
+}
+
+function filterUsageRange(rows, days) {
+  const dates = Array.from(new Set(rows.map(row => row.date))).sort();
+  const visibleDates = dates.slice(-days);
+  return rows.filter(row => visibleDates.includes(row.date));
 }
 
 function annotateAnomalies(rows) {
@@ -192,12 +204,12 @@ function annotateAnomalies(rows) {
 function drawDailyLineChart(canvas, rows) {
   drawChartBase(canvas, ctx => {
     const { w, h, x0, y0, plotW, plotH } = dims(canvas);
-    drawGrid(ctx, x0, y0, plotW, plotH);
     if (!rows.length) return drawEmpty(ctx, canvas, '第二次采集后开始生成日耗');
 
-    const dates = Array.from(new Set(rows.map(row => row.date))).slice(-14);
+    const dates = Array.from(new Set(rows.map(row => row.date))).sort();
     const visible = rows.filter(row => dates.includes(row.date));
     const max = Math.max(...visible.map(row => row.usage), 1);
+    drawAxes(ctx, { x0, y0, plotW, plotH }, dates, max);
 
     TARGETS.forEach(meta => {
       const points = dates.map((date, index) => {
@@ -236,7 +248,6 @@ function drawDailyLineChart(canvas, rows) {
       });
     });
 
-    drawLineAxisLabels(ctx, dates, w, h);
   });
 }
 
@@ -247,8 +258,8 @@ function drawUsagePieChart(canvas, rows) {
     const total = totals.reduce((sum, item) => sum + item.usage, 0);
     if (total <= 0) return drawEmpty(ctx, canvas, '第二次采集后开始生成占比');
 
-    const radius = Math.min(92, w * 0.24, h * 0.32);
-    const cx = w < 560 ? w / 2 : w * 0.35;
+    const radius = Math.min(96, w * 0.24, h * 0.33);
+    const cx = w / 2;
     const cy = h * 0.48;
     let start = -Math.PI / 2;
 
@@ -276,22 +287,6 @@ function drawUsagePieChart(canvas, rows) {
     ctx.font = '700 18px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
     ctx.fillText(`${formatNumber(total)} 度`, cx, cy + 18);
 
-    const legendX = w < 560 ? 24 : w * 0.64;
-    const legendY = w < 560 ? cy + radius + 34 : cy - 42;
-    ctx.textAlign = 'left';
-    totals.forEach((item, index) => {
-      const y = legendY + index * 34;
-      ctx.fillStyle = item.meta.color;
-      ctx.beginPath();
-      ctx.arc(legendX, y - 4, 5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#18212f';
-      ctx.font = '700 13px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
-      ctx.fillText(item.meta.title.replace('用电剩余', ''), legendX + 14, y);
-      ctx.fillStyle = colors.muted;
-      ctx.font = '12px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
-      ctx.fillText(`${formatNumber(item.usage)} 度 · ${Math.round(item.usage / total * 100)}%`, legendX + 14, y + 17);
-    });
   });
 }
 
@@ -303,7 +298,7 @@ function renderDailySummary(rows) {
   }
 
   const cards = TARGETS.map(meta => {
-    const list = rows.filter(row => row.targetId === meta.id).slice(-7);
+    const list = rows.filter(row => row.targetId === meta.id);
     const average = list.length ? list.reduce((sum, row) => sum + row.usage, 0) / list.length : null;
     const latest = list.at(-1);
     const anomalies = list.filter(row => row.anomaly);
@@ -311,7 +306,7 @@ function renderDailySummary(rows) {
       <div class="usage-stat">
         <span class="legend-dot" style="background: ${meta.color}"></span>
         <strong>${escapeHtml(meta.title)}</strong>
-        <span>近7次均值 ${average === null ? '--' : `${formatNumber(average)} 度`}</span>
+        <span>近${state.rangeDays}天均值 ${average === null ? '--' : `${formatNumber(average)} 度`}</span>
         <span>最近 ${latest ? `${formatNumber(latest.usage)} 度` : '--'}</span>
         <span class="${anomalies.length ? 'danger-text' : ''}">异常 ${anomalies.length} 次</span>
       </div>
@@ -358,8 +353,10 @@ function renderPieSummary(rows) {
 function drawChartBase(canvas, draw) {
   const ratio = window.devicePixelRatio || 1;
   const rect = canvas.getBoundingClientRect();
+  const height = chartHeight(canvas);
+  canvas.dataset.chartHeight = String(height);
   canvas.width = Math.max(320, rect.width) * ratio;
-  canvas.height = Number(canvas.getAttribute('height')) * ratio;
+  canvas.height = height * ratio;
   const ctx = canvas.getContext('2d');
   ctx.scale(ratio, ratio);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -368,7 +365,7 @@ function drawChartBase(canvas, draw) {
 
 function dims(canvas) {
   const w = canvas.clientWidth;
-  const h = Number(canvas.getAttribute('height'));
+  const h = chartHeight(canvas);
   return { w, h, x0: 44, y0: 18, plotW: w - 66, plotH: h - 56 };
 }
 
@@ -384,29 +381,53 @@ function drawGrid(ctx, x, y, w, h) {
   }
 }
 
-function drawLineAxisLabels(ctx, dates, w, h) {
+function drawAxes(ctx, { x0, y0, plotW, plotH }, dates, max) {
+  drawGrid(ctx, x0, y0, plotW, plotH);
   ctx.fillStyle = colors.muted;
   ctx.font = '12px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
-  ctx.fillText('度/日', 44, h - 14);
-  const text = dates.length > 1
-    ? `${dates[0].slice(5)} 至 ${dates.at(-1).slice(5)}`
-    : dates[0]?.slice(5) || '最近 14 天';
-  ctx.fillText(text, Math.max(44, w - 116), h - 14);
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= 4; i += 1) {
+    const value = max * (4 - i) / 4;
+    const y = y0 + plotH * i / 4;
+    ctx.fillText(formatNumber(value), x0 - 9, y + 4);
+  }
+
+  ctx.strokeStyle = colors.muted;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x0, y0);
+  ctx.lineTo(x0, y0 + plotH);
+  ctx.lineTo(x0 + plotW, y0 + plotH);
+  ctx.stroke();
+
+  ctx.textAlign = 'center';
+  const labelStep = Math.max(1, Math.ceil(dates.length / 7));
+  dates.forEach((date, index) => {
+    if (index % labelStep !== 0 && index !== dates.length - 1) return;
+    const x = dates.length === 1 ? x0 + plotW / 2 : x0 + plotW * index / (dates.length - 1);
+    ctx.fillText(date.slice(5), x, y0 + plotH + 22);
+  });
+  ctx.textAlign = 'left';
+  ctx.fillText('度/日', x0, y0 - 7);
+  ctx.textAlign = 'right';
+  ctx.fillText('日期', x0 + plotW, y0 + plotH + 42);
 }
 
 function canvasDims(canvas) {
   return {
     w: canvas.clientWidth,
-    h: Number(canvas.getAttribute('height'))
+    h: chartHeight(canvas)
   };
 }
 
+function chartHeight(canvas) {
+  return Number(canvas.dataset.chartHeight || canvas.getAttribute('height') || 320);
+}
+
 function usageTotals(rows) {
-  const dates = Array.from(new Set(rows.map(row => row.date))).slice(-14);
-  const visible = rows.filter(row => dates.includes(row.date));
   return TARGETS.map(meta => ({
     meta,
-    usage: Number(visible
+    usage: Number(rows
       .filter(row => row.targetId === meta.id)
       .reduce((sum, row) => sum + row.usage, 0)
       .toFixed(2))
@@ -416,7 +437,7 @@ function usageTotals(rows) {
 function drawEmpty(ctx, canvas, text) {
   ctx.fillStyle = colors.muted;
   ctx.font = '14px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
-  ctx.fillText(text, 24, Number(canvas.getAttribute('height')) / 2);
+  ctx.fillText(text, 24, chartHeight(canvas) / 2);
 }
 
 function remainingKwh(row) {

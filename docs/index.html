@@ -26,21 +26,29 @@
         <article class="panel usage-panel">
           <div class="panel-head">
             <h2>日耗趋势</h2>
-            <div class="legend">
-              <span><i class="legend-dot lighting"></i>照明</span>
-              <span><i class="legend-dot ac"></i>空调</span>
+            <div class="panel-controls">
+              <div class="legend">
+                <span><i class="legend-dot lighting"></i>照明</span>
+                <span><i class="legend-dot ac"></i>空调</span>
+              </div>
+              <label class="range-control" for="rangeDays">显示
+                <select id="rangeDays">
+                  <option value="7">最近 7 天</option>
+                  <option value="14" selected>最近 14 天</option>
+                </select>
+              </label>
             </div>
           </div>
-          <canvas id="dailyLineChart" height="300"></canvas>
+          <canvas id="dailyLineChart" height="320"></canvas>
           <div class="daily-summary" id="dailySummary"></div>
         </article>
 
         <article class="panel usage-panel">
           <div class="panel-head">
             <h2>用电占比</h2>
-            <p class="panel-note">最近 14 天</p>
+            <p class="panel-note" id="rangeNote">最近 14 天</p>
           </div>
-          <canvas id="usagePieChart" height="300"></canvas>
+          <canvas id="usagePieChart" height="320"></canvas>
           <div class="daily-summary" id="pieSummary"></div>
         </article>
       </section>
