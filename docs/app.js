@@ -64,10 +64,21 @@ function render() {
 }
 
 function renderStatus() {
-  const updated = state.latest?.updatedAt ? new Date(state.latest.updatedAt) : null;
+  const times = [...new Set([
+    state.latest?.updatedAt,
+    ...state.history.map(row => row.checkedAt)
+  ].filter(Boolean))]
+    .map(value => new Date(value))
+    .filter(date => Number.isFinite(date.getTime()))
+    .sort((a, b) => b - a);
+  const updated = times[0] || null;
+  const previous = times[1] || null;
   document.getElementById('updatedAt').textContent = updated
     ? `最近采集 ${formatDateTime(updated)}`
     : '等待第一次采集';
+  document.getElementById('previousUpdatedAt').textContent = previous
+    ? ` · 上次采集 ${formatDateTime(previous)}`
+    : '';
 
   const alerts = state.latest?.alerts || [];
   const pill = document.getElementById('statusPill');

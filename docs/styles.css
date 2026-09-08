@@ -63,6 +63,10 @@ h1 {
   font-size: 0.9rem;
 }
 
+#previousUpdatedAt {
+  margin-left: 8px;
+}
+
 .status-pill {
   flex: none;
   border: 1px solid var(--line);
