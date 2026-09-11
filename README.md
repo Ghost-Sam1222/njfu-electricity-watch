@@ -4,7 +4,17 @@
 
 ## 第一阶段目标
 
-先跑通 GitHub Actions 自动查询和 Bark 预警。看板文件已经在 `docs/`，但私有仓库的 GitHub Pages 可能受账号计划限制，后面第二阶段再接 GitHub Pages 或 Cloudflare。
+先跑通 GitHub Actions 自动查询和 Bark 预警。看板文件在 `docs/`，并已配好 GitHub Pages 自动部署：代码或采集数据更新后，页面会自动重新发布。
+
+## GitHub Pages 看板
+
+首次启用时，在仓库的 `Settings` -> `Pages` -> `Build and deployment` -> `Source` 中选择 `GitHub Actions`。之后打开：
+
+```text
+https://ghost-sam1222.github.io/njfu-electricity-watch/
+```
+
+页面适合电脑和手机访问。GitHub Pages 的网页本身是公开访问的；私有仓库能否使用 Pages 取决于账号计划，但即使仓库保持私有，发布出来的网页也不等于私有。当前 `docs/` 只包含看板、图标和电量历史，不包含一卡通令牌、Bark URL 或代理配置；这些机密只放在 GitHub Secrets 中。
 
 仓库里需要两个 Secrets：
 
