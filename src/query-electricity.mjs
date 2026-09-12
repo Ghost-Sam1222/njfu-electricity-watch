@@ -228,8 +228,18 @@ async function notifyBark(results, barkConfig) {
     ? '南林宿舍电量危险'
     : '南林宿舍电量预警';
   const body = results.map(result => {
-    const alerts = result.alerts.map(alert => `- ${alert.message}`).join('\n');
-    return `${result.name}\n剩余：${result.summary}\n${alerts}`;
+    const shortName = result.id === 'lighting' ? '照明插座' : result.id === 'ac' ? '空调' : result.name;
+    const usageAlerts = result.alerts.filter(alert => alert.metric === 'usage');
+    const thresholdAlerts = result.alerts.filter(alert => alert.metric !== 'usage');
+    const usageDetails = result.usageInterval
+      ? `本次间隔实际耗电：${result.usageInterval.usageKwh.toFixed(2)} 度\n采集间隔：${result.usageInterval.hours.toFixed(2)} 小时`
+      : '';
+    const sections = [shortName];
+    if (thresholdAlerts.length) sections.push(`剩余：${result.summary}`);
+    if (usageAlerts.length) sections.push(usageAlerts.map(alert => alert.message).join('\n'));
+    if (usageDetails) sections.push(usageDetails);
+    if (thresholdAlerts.length) sections.push(thresholdAlerts.map(alert => alert.message).join('\n'));
+    return sections.join('\n');
   }).join('\n\n');
 
   const url = new URL(encodeURIComponent(title) + '/' + encodeURIComponent(body), ensureSlash(barkUrl));

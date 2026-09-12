@@ -29,11 +29,17 @@ export function extractMetrics(showData, options = {}) {
     const probe = `${key} ${valueText}`;
     if (metrics.kwh === undefined && KWH_KEYS.test(probe)) {
       const number = parseKwhNumber(probe);
-      if (number !== null) metrics.kwh = number;
+      if (number !== null) {
+        metrics.kwh = number;
+        metrics.kwhSource = key;
+      }
     }
     if (metrics.amount === undefined && AMOUNT_KEYS.test(probe)) {
       const number = parseAmountNumber(probe);
-      if (number !== null) metrics.amount = number;
+      if (number !== null) {
+        metrics.amount = number;
+        metrics.amountSource = key;
+      }
     }
   }
 
@@ -134,7 +140,7 @@ export function detectUsageAnomaly(target, current, historyRows = []) {
   const hardLimit = typeof expectedDailyKwh === 'number' ? expectedDailyKwh * multiplier : null;
 
   if (hardLimit !== null && projectedDailyKwh > hardLimit) {
-    return anomalyResult('hard-limit', hours, usageKwh, projectedDailyKwh, `折算日耗 ${projectedDailyKwh.toFixed(1)} 度，超过保守上限 ${hardLimit.toFixed(1)} 度`);
+    return anomalyResult('hard-limit', hours, usageKwh, projectedDailyKwh, `折算日耗：${projectedDailyKwh.toFixed(2)} 度超过保守上限${hardLimit.toFixed(1)} 度`);
   }
 
   const minSamples = threshold.anomalyMinSamples ?? 7;
@@ -152,7 +158,7 @@ export function detectUsageAnomaly(target, current, historyRows = []) {
   const spread = Math.max(mad(recent, med) * 1.4826, expectedDailyKwh * 0.15, 1);
   const relativeLimit = Math.max(med * 1.7, med + 3 * spread);
   if (projectedDailyKwh > relativeLimit) {
-    return anomalyResult('relative-spike', hours, usageKwh, projectedDailyKwh, `折算日耗 ${projectedDailyKwh.toFixed(1)} 度，高于近期中位 ${med.toFixed(1)} 度`);
+    return anomalyResult('relative-spike', hours, usageKwh, projectedDailyKwh, `折算日耗：${projectedDailyKwh.toFixed(2)} 度高于近期中位${med.toFixed(1)} 度`);
   }
 
   return {

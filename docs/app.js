@@ -323,12 +323,17 @@ function renderDailySummary(rows) {
     const average = list.length ? list.reduce((sum, row) => sum + row.usage, 0) / list.length : null;
     const latest = list.at(-1);
     const anomalies = list.filter(row => row.anomaly);
+    const latestTarget = (state.latest?.targets || []).find(target => target.id === meta.id);
+    const projected = number(latestTarget?.usageInterval?.projectedDailyKwh);
+    const stable = isBalanceStable(meta.id);
     return `
       <div class="usage-stat">
         <span class="legend-dot" style="background: ${meta.color}"></span>
         <strong>${escapeHtml(meta.title)}</strong>
         <span>近${state.rangeDays}天均值 ${average === null ? '--' : `${formatNumber(average)} 度`}</span>
-        <span>最近 ${latest ? `${formatNumber(latest.usage)} 度` : '--'}</span>
+        <span>最近实际耗电 ${latest ? `${formatNumber(latest.usage)} 度` : '--'}</span>
+        <span>当前折算日耗 ${projected === null ? '--' : `${formatNumber(projected)} 度`}</span>
+        ${stable ? '<span class="panel-note">连续采集余额未变化，暂未观察到耗电</span>' : ''}
         <span class="${anomalies.length ? 'danger-text' : ''}">异常 ${anomalies.length} 次</span>
       </div>
     `;
@@ -346,6 +351,16 @@ function renderDailySummary(rows) {
     <div class="usage-stats">${cards}</div>
     <ul class="anomaly-list">${anomalyText}</ul>
   `;
+}
+
+function isBalanceStable(targetId) {
+  const values = state.history
+    .filter(row => row.id === targetId)
+    .sort((a, b) => Date.parse(b.checkedAt) - Date.parse(a.checkedAt))
+    .map(row => remainingKwh(row))
+    .filter(value => value !== null)
+    .slice(0, 3);
+  return values.length >= 3 && values.every(value => Math.abs(value - values[0]) < 0.01);
 }
 
 function renderPieSummary(rows) {
@@ -407,7 +422,7 @@ function nearestChartPoint(canvas, event) {
 function showChartTooltip(canvas, point) {
   const tooltip = document.getElementById('chartTooltip');
   const meta = TARGETS.find(item => item.id === point.row.targetId);
-  tooltip.innerHTML = `<strong>${escapeHtml(point.row.date)} · ${escapeHtml(meta?.title || point.row.targetId)}</strong>${formatNumber(point.row.usage)} 度`;
+  tooltip.innerHTML = `<strong>${escapeHtml(point.row.date)} · ${escapeHtml(meta?.title || point.row.targetId)}</strong>实际耗电 ${formatNumber(point.row.usage)} 度`;
   tooltip.hidden = false;
   const left = Math.max(6, Math.min(canvas.clientWidth - tooltip.offsetWidth - 6, point.x + 10));
   const top = Math.max(38, point.y - 8);
