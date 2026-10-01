@@ -340,5 +340,1030 @@
     "summary": "192.3 度",
     "alerts": [],
     "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-12T04:11:57.992Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 173.12,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "173.12 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 10.51,
+      "usageKwh": 0.09,
+      "projectedDailyKwh": 0.21
+    }
+  },
+  {
+    "checkedAt": "2026-09-12T04:11:57.992Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-12T16:53:42.936Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 170.29,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "170.29 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 12.7,
+      "usageKwh": 2.83,
+      "projectedDailyKwh": 5.35
+    }
+  },
+  {
+    "checkedAt": "2026-09-12T16:53:42.936Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-13T04:24:18.876Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 167.48,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "167.48 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 11.51,
+      "usageKwh": 2.81,
+      "projectedDailyKwh": 5.86
+    }
+  },
+  {
+    "checkedAt": "2026-09-13T04:24:18.876Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-13T17:21:56.202Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 165.05,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "165.05 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 12.96,
+      "usageKwh": 2.43,
+      "projectedDailyKwh": 4.5
+    }
+  },
+  {
+    "checkedAt": "2026-09-13T17:21:56.202Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-14T04:30:59.805Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 163.03,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "163.03 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 11.15,
+      "usageKwh": 2.02,
+      "projectedDailyKwh": 4.35
+    }
+  },
+  {
+    "checkedAt": "2026-09-14T04:30:59.805Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-14T19:11:39.579Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 158.95,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "158.95 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 14.68,
+      "usageKwh": 4.08,
+      "projectedDailyKwh": 6.67
+    }
+  },
+  {
+    "checkedAt": "2026-09-14T19:11:39.579Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-15T04:31:08.527Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 158.85,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "158.85 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 9.32,
+      "usageKwh": 0.1,
+      "projectedDailyKwh": 0.26
+    }
+  },
+  {
+    "checkedAt": "2026-09-15T04:31:08.527Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-15T18:04:45.014Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 154.79,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "154.79 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 13.56,
+      "usageKwh": 4.06,
+      "projectedDailyKwh": 7.19
+    }
+  },
+  {
+    "checkedAt": "2026-09-15T18:04:45.014Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-16T04:26:30.140Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 154.68,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "154.68 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 10.36,
+      "usageKwh": 0.11,
+      "projectedDailyKwh": 0.25
+    }
+  },
+  {
+    "checkedAt": "2026-09-16T04:26:30.140Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-16T18:04:47.212Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 151.09,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "151.09 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 13.64,
+      "usageKwh": 3.59,
+      "projectedDailyKwh": 6.32
+    }
+  },
+  {
+    "checkedAt": "2026-09-16T18:04:47.212Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-17T18:05:16.269Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 147.23,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "147.23 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 24.01,
+      "usageKwh": 3.86,
+      "projectedDailyKwh": 3.86
+    }
+  },
+  {
+    "checkedAt": "2026-09-17T18:05:16.269Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-18T04:17:20.695Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 147.09,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "147.09 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 10.2,
+      "usageKwh": 0.14,
+      "projectedDailyKwh": 0.33
+    }
+  },
+  {
+    "checkedAt": "2026-09-18T04:17:20.695Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-18T17:37:10.920Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 141.93,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "141.93 度",
+    "alerts": [
+      {
+        "level": "warning",
+        "metric": "usage",
+        "message": "折算日耗：9.29 度超过保守上限7.2 度"
+      }
+    ],
+    "usageInterval": {
+      "kind": "hard-limit",
+      "hours": 13.33,
+      "usageKwh": 5.16,
+      "projectedDailyKwh": 9.29,
+      "alert": {
+        "level": "warning",
+        "metric": "usage",
+        "message": "折算日耗：9.29 度超过保守上限7.2 度"
+      }
+    }
+  },
+  {
+    "checkedAt": "2026-09-18T17:37:10.920Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-19T04:13:50.528Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 141.87,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "141.87 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 10.61,
+      "usageKwh": 0.06,
+      "projectedDailyKwh": 0.14
+    }
+  },
+  {
+    "checkedAt": "2026-09-19T04:13:50.528Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-19T17:07:05.444Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 140.1,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "140.1 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 12.89,
+      "usageKwh": 1.77,
+      "projectedDailyKwh": 3.3
+    }
+  },
+  {
+    "checkedAt": "2026-09-19T17:07:05.444Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-20T04:32:47.879Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 138.52,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "138.52 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 11.43,
+      "usageKwh": 1.58,
+      "projectedDailyKwh": 3.32
+    }
+  },
+  {
+    "checkedAt": "2026-09-20T04:32:47.879Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-20T17:22:23.795Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 135.87,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "135.87 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 12.83,
+      "usageKwh": 2.65,
+      "projectedDailyKwh": 4.96
+    }
+  },
+  {
+    "checkedAt": "2026-09-20T17:22:23.795Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-21T04:30:52.662Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 134.45,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "134.45 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 11.14,
+      "usageKwh": 1.42,
+      "projectedDailyKwh": 3.06
+    }
+  },
+  {
+    "checkedAt": "2026-09-21T04:30:52.662Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-22T04:26:47.930Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 129.6,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "129.6 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 23.93,
+      "usageKwh": 4.85,
+      "projectedDailyKwh": 4.86
+    }
+  },
+  {
+    "checkedAt": "2026-09-22T04:26:47.930Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-22T18:01:25.756Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 125.57,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "125.57 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 13.58,
+      "usageKwh": 4.03,
+      "projectedDailyKwh": 7.12
+    }
+  },
+  {
+    "checkedAt": "2026-09-22T18:01:25.756Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-23T04:23:32.459Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 125.36,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "125.36 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 10.37,
+      "usageKwh": 0.21,
+      "projectedDailyKwh": 0.49
+    }
+  },
+  {
+    "checkedAt": "2026-09-23T04:23:32.459Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-23T18:20:46.221Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 121.49,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "121.49 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 13.95,
+      "usageKwh": 3.87,
+      "projectedDailyKwh": 6.66
+    }
+  },
+  {
+    "checkedAt": "2026-09-23T18:20:46.221Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-24T04:20:26.632Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 121.41,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "121.41 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 9.99,
+      "usageKwh": 0.08,
+      "projectedDailyKwh": 0.19
+    }
+  },
+  {
+    "checkedAt": "2026-09-24T04:20:26.632Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-24T18:21:41.872Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 119.63,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "119.63 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 14.02,
+      "usageKwh": 1.78,
+      "projectedDailyKwh": 3.05
+    }
+  },
+  {
+    "checkedAt": "2026-09-24T18:21:41.872Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-25T04:31:44.013Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 119.62,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "119.62 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-25T04:31:44.013Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-25T18:25:45.624Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 119.5,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "119.5 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 13.9,
+      "usageKwh": 0.12,
+      "projectedDailyKwh": 0.21
+    }
+  },
+  {
+    "checkedAt": "2026-09-25T18:25:45.624Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-26T04:35:49.388Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 119.49,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "119.49 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-26T04:35:49.388Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-26T17:41:57.130Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 119.27,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "119.27 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 13.1,
+      "usageKwh": 0.22,
+      "projectedDailyKwh": 0.4
+    }
+  },
+  {
+    "checkedAt": "2026-09-26T17:41:57.130Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-27T04:55:22.958Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 119.27,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "119.27 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-27T04:55:22.958Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-27T18:13:41.545Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 119.12,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "119.12 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 13.31,
+      "usageKwh": 0.15,
+      "projectedDailyKwh": 0.27
+    }
+  },
+  {
+    "checkedAt": "2026-09-27T18:13:41.545Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-28T04:56:53.291Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 119.11,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "119.11 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-28T04:56:53.291Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-28T20:28:13.059Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 116.49,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "116.49 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 15.52,
+      "usageKwh": 2.62,
+      "projectedDailyKwh": 4.05
+    }
+  },
+  {
+    "checkedAt": "2026-09-28T20:28:13.059Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-29T05:21:56.122Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 116.49,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "116.49 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-29T05:21:56.122Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-30T05:09:58.825Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 116.39,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "116.39 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 23.8,
+      "usageKwh": 0.1,
+      "projectedDailyKwh": 0.1
+    }
+  },
+  {
+    "checkedAt": "2026-09-30T05:09:58.825Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-09-30T19:02:43.809Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 116.29,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "116.29 度",
+    "alerts": [],
+    "usageInterval": {
+      "kind": "usage",
+      "hours": 13.88,
+      "usageKwh": 0.1,
+      "projectedDailyKwh": 0.17
+    }
+  },
+  {
+    "checkedAt": "2026-09-30T19:02:43.809Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-10-01T05:24:45.245Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 116.28,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "116.28 度",
+    "alerts": [],
+    "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-10-01T05:24:45.245Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
   }
 ]
