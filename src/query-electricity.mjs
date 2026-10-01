@@ -128,8 +128,20 @@ async function applySelectors(client, target, params, defaults) {
 }
 
 async function getThirdDataMap(client, params, context) {
-  const response = assertCasOk(await client.getThirdData(params), context);
-  return response.map || response.data || response;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const response = assertCasOk(await client.getThirdData(params), context);
+    const map = response.map || response.data || response;
+    if (!hasEmptyChoices(map) || attempt === 2) return map;
+    await sleep(800 * (attempt + 1));
+  }
+}
+
+function hasEmptyChoices(map) {
+  return !Array.isArray(map?.data) || map.data.length === 0;
+}
+
+function sleep(milliseconds) {
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
 
 function sortedFields(map) {
