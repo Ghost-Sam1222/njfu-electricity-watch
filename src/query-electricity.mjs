@@ -129,9 +129,15 @@ async function applySelectors(client, target, params, defaults) {
 
 async function getThirdDataMap(client, params, context) {
   for (let attempt = 0; attempt < 3; attempt += 1) {
-    const response = assertCasOk(await client.getThirdData(params), context);
-    const map = response.map || response.data || response;
-    if (!hasEmptyChoices(map) || attempt === 2) return map;
+    try {
+      const response = assertCasOk(await client.getThirdData(params), context);
+      const map = response.map || response.data || response;
+      if (!hasEmptyChoices(map) || attempt === 2) return map;
+    } catch (error) {
+      const transientNetworkError = error instanceof Error
+        && error.message.startsWith('CAS network request failed:');
+      if (!transientNetworkError || attempt === 2) throw error;
+    }
     await sleep(800 * (attempt + 1));
   }
 }
