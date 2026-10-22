@@ -1,16 +1,16 @@
 {
-  "updatedAt": "2026-10-22T04:17:52.790Z",
+  "updatedAt": "2026-10-22T18:26:44.690Z",
   "targets": [
     {
-      "checkedAt": "2026-10-22T04:17:52.790Z",
+      "checkedAt": "2026-10-22T18:26:44.690Z",
       "id": "lighting",
       "name": "本部研楼及9-13栋照明/插座",
       "feeitemid": 489,
       "metrics": {
-        "kwh": 50.71,
+        "kwh": 47.77,
         "kwhSource": "信息"
       },
-      "summary": "50.71 度",
+      "summary": "47.77 度",
       "alerts": [],
       "queryParams": {
         "type": "IEC",
@@ -22,13 +22,13 @@
       },
       "usageInterval": {
         "kind": "usage",
-        "hours": 23.99,
-        "usageKwh": 4.37,
-        "projectedDailyKwh": 4.37
+        "hours": 14.15,
+        "usageKwh": 2.94,
+        "projectedDailyKwh": 4.99
       }
     },
     {
-      "checkedAt": "2026-10-22T04:17:52.790Z",
+      "checkedAt": "2026-10-22T18:26:44.690Z",
       "id": "ac",
       "name": "本部其他公寓空调",
       "feeitemid": 528,
