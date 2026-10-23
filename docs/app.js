@@ -1,4 +1,5 @@
 import { getDataStatus } from './status.mjs';
+import { buildDailyUsage, filterUsageRange } from './usage.mjs';
 
 const TARGETS = [
   {
@@ -8,6 +9,7 @@ const TARGETS = [
     color: '#157a5b',
     expectedDailyKwh: 4,
     anomalyHardLimitKwh: 9,
+    anomalyMinIntervalHours: 8,
     relativeAnomalyEnabled: false
   },
   {
@@ -135,7 +137,7 @@ function renderBalances() {
 }
 
 function renderDailyUsage() {
-  const rows = filterUsageRange(buildDailyUsage(state.history), state.rangeDays);
+  const rows = filterUsageRange(buildDailyUsage(state.history, TARGETS), state.rangeDays);
   drawDailyLineChart(document.getElementById('dailyLineChart'), rows);
   drawUsagePieChart(document.getElementById('usagePieChart'), rows);
   renderDailySummary(rows);
@@ -160,74 +162,6 @@ function displayRemaining(metrics = {}) {
     };
   }
   return { main: '--', unit: '度', extra: '未识别数据' };
-}
-
-function buildDailyUsage(history) {
-  const byTarget = groupBy(
-    history.filter(row => remainingKwh(row) !== null && row.checkedAt),
-    row => row.id
-  );
-  const dailyMap = new Map();
-
-  for (const [targetId, rows] of Object.entries(byTarget)) {
-    const sorted = rows.slice().sort((a, b) => Date.parse(a.checkedAt) - Date.parse(b.checkedAt));
-    for (let i = 1; i < sorted.length; i += 1) {
-      const prev = sorted[i - 1];
-      const curr = sorted[i];
-      const prevKwh = remainingKwh(prev);
-      const currKwh = remainingKwh(curr);
-      const hours = (Date.parse(curr.checkedAt) - Date.parse(prev.checkedAt)) / 36e5;
-      const usage = prevKwh - currKwh;
-      if (hours <= 0 || hours > 72 || usage < 0.05) continue;
-
-      const date = localDateKey(new Date(curr.checkedAt));
-      const key = `${date}:${targetId}`;
-      const row = dailyMap.get(key) || {
-        date,
-        targetId,
-        usage: 0,
-        intervals: 0,
-        anomaly: null
-      };
-      row.usage += usage;
-      row.intervals += 1;
-      dailyMap.set(key, row);
-    }
-  }
-
-  const rows = Array.from(dailyMap.values())
-    .map(row => ({ ...row, usage: Number(row.usage.toFixed(2)) }))
-    .sort((a, b) => a.date.localeCompare(b.date));
-
-  annotateAnomalies(rows);
-  return rows;
-}
-
-function filterUsageRange(rows, days) {
-  const dates = Array.from(new Set(rows.map(row => row.date))).sort();
-  const visibleDates = dates.slice(-days);
-  return rows.filter(row => visibleDates.includes(row.date));
-}
-
-function annotateAnomalies(rows) {
-  for (const meta of TARGETS) {
-    const list = rows.filter(row => row.targetId === meta.id).sort((a, b) => a.date.localeCompare(b.date));
-    for (let i = 0; i < list.length; i += 1) {
-      const previous = list.slice(Math.max(0, i - 14), i).map(row => row.usage);
-      const hardLimit = meta.anomalyHardLimitKwh ?? meta.expectedDailyKwh * 1.8;
-      if (list[i].usage > hardLimit) {
-        list[i].anomaly = `超过保守上限 ${formatNumber(hardLimit)} 度`;
-        continue;
-      }
-      if (meta.relativeAnomalyEnabled === false || previous.length < 7) continue;
-      const med = median(previous);
-      const spread = Math.max(mad(previous, med) * 1.4826, meta.expectedDailyKwh * 0.15, 1);
-      const relativeLimit = Math.max(med * 1.7, med + 3 * spread);
-      if (list[i].usage > relativeLimit) {
-        list[i].anomaly = `高于近期中位 ${formatNumber(med)} 度`;
-      }
-    }
-  }
 }
 
 function drawDailyLineChart(canvas, rows) {
@@ -344,8 +278,8 @@ function renderDailySummary(rows) {
       <div class="usage-stat">
         <span class="legend-dot" style="background: ${meta.color}"></span>
         <strong>${escapeHtml(meta.title)}</strong>
-        <span>近${state.rangeDays}天均值 ${average === null ? '--' : `${formatNumber(average)} 度`}</span>
-        <span>最近实际耗电 ${latest ? `${formatNumber(latest.usage)} 度` : '--'}</span>
+        <span>近${state.rangeDays}个采集结束日区间实耗均值 ${average === null ? '--' : `${formatNumber(average)} 度`}</span>
+        <span>最近采集区间实耗 ${latest ? `${formatNumber(latest.usage)} 度（覆盖 ${formatNumber(latest.hours)} 小时）` : '--'}</span>
         <span>24小时折算（非全天实耗） ${projected === null ? '--' : `${formatNumber(projected)} 度`}</span>
         ${shortInterval ? '<span class="panel-note">采集间隔不足 8 小时，折算仅供参考</span>' : ''}
         ${stable ? '<span class="panel-note">连续采集余额未变化，暂未观察到耗电</span>' : ''}
@@ -358,7 +292,7 @@ function renderDailySummary(rows) {
   const anomalyText = anomalyRows.length
     ? anomalyRows.map(row => {
       const meta = TARGETS.find(item => item.id === row.targetId);
-      return `<li>${escapeHtml(row.date)} ${escapeHtml(meta?.title || row.targetId)} ${formatNumber(row.usage)} 度，${escapeHtml(row.anomaly)}</li>`;
+      return `<li>${escapeHtml(row.date)} ${escapeHtml(meta?.title || row.targetId)} 区间实耗 ${formatNumber(row.usage)} 度（覆盖 ${formatNumber(row.hours)} 小时），${escapeHtml(row.anomaly)}</li>`;
     }).join('')
     : '<li>近期没有日耗突增。</li>';
 
@@ -437,7 +371,7 @@ function nearestChartPoint(canvas, event) {
 function showChartTooltip(canvas, point) {
   const tooltip = document.getElementById('chartTooltip');
   const meta = TARGETS.find(item => item.id === point.row.targetId);
-  tooltip.innerHTML = `<strong>${escapeHtml(point.row.date)} · ${escapeHtml(meta?.title || point.row.targetId)}</strong>实际耗电 ${formatNumber(point.row.usage)} 度`;
+  tooltip.innerHTML = `<strong>${escapeHtml(point.row.date)} · ${escapeHtml(meta?.title || point.row.targetId)}</strong>采集区间实耗 ${formatNumber(point.row.usage)} 度<br>覆盖 ${formatNumber(point.row.hours)} 小时 · 24小时折算 ${formatNumber(point.row.projectedDailyKwh)} 度`;
   tooltip.hidden = false;
   const left = Math.max(6, Math.min(canvas.clientWidth - tooltip.offsetWidth - 6, point.x + 10));
   const top = Math.max(38, point.y - 8);
@@ -529,7 +463,7 @@ function drawAxes(ctx, { x0, y0, plotW, plotH }, dates, max) {
     ctx.fillText(date.slice(5), x, y0 + plotH + 22);
   });
   ctx.textAlign = 'left';
-  ctx.fillText('度/日', x0, y0 - 7);
+  ctx.fillText('区间度数', x0, y0 - 7);
   ctx.textAlign = 'right';
   ctx.fillText('日期', x0 + plotW, y0 + plotH + 42);
 }
@@ -569,25 +503,6 @@ function number(value) {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
-function median(values) {
-  const sorted = values.slice().sort((a, b) => a - b);
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
-}
-
-function mad(values, med) {
-  return median(values.map(value => Math.abs(value - med)));
-}
-
-function groupBy(rows, fn) {
-  return rows.reduce((acc, row) => {
-    const key = fn(row);
-    acc[key] ||= [];
-    acc[key].push(row);
-    return acc;
-  }, {});
-}
-
 function scale(value, min, max, size) {
   if (max === min) return size / 2;
   return (value - min) / (max - min) * size;
@@ -600,13 +515,6 @@ function formatDateTime(date) {
     hour: '2-digit',
     minute: '2-digit'
   });
-}
-
-function localDateKey(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
 }
 
 function formatNumber(value) {

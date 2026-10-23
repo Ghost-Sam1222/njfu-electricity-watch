@@ -4,6 +4,7 @@ import path from 'node:path';
 import { createCasClient, assertCasOk } from './casClient.mjs';
 import { detectUsageAnomaly, evaluateThreshold, extractMetrics, summarizeMetrics } from './thresholds.mjs';
 import { markNotificationsSent, planNotifications } from './notificationPolicy.mjs';
+import { sendBarkRequest } from './bark.mjs';
 
 const DEFAULT_CONFIG = 'config/targets.json';
 const EXAMPLE_CONFIG = 'config/targets.example.json';
@@ -280,9 +281,7 @@ async function notifyBark(results, barkConfig) {
   const icon = process.env.BARK_ICON_URL || iconFromPagesBase();
   if (icon) url.searchParams.set('icon', icon);
 
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`Bark notification failed: ${response.status} ${response.statusText}`);
-  return true;
+  return sendBarkRequest(url);
 }
 
 function iconFromPagesBase() {
