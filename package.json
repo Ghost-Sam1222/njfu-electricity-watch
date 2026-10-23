@@ -8,6 +8,7 @@
     "discover": "node src/query-electricity.mjs --discover",
     "diagnose": "node src/diagnose-network.mjs",
     "query": "node src/query-electricity.mjs",
+    "mark:collection-failed": "node src/mark-collection-failure.mjs",
     "export:bills": "node src/export-bills.mjs"
   },
   "engines": {

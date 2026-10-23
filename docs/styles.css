@@ -94,6 +94,19 @@ h1 {
   background: #fff0f0;
 }
 
+.status-pill.error {
+  color: var(--red);
+  border-color: #f5a3a3;
+  background: #fff0f0;
+}
+
+.status-pill.stale,
+.status-pill.empty {
+  color: #5f6875;
+  border-color: #c9d0da;
+  background: #f3f5f8;
+}
+
 main {
   width: min(1060px, calc(100% - 36px));
   margin: 30px auto 54px;
@@ -132,6 +145,12 @@ main {
   background: #fffafa;
 }
 
+.balance-card.unavailable {
+  border-color: #c9d0da;
+  border-top-color: #7d8794;
+  background: #f7f8fa;
+}
+
 .balance-head {
   display: flex;
   align-items: flex-start;
@@ -166,6 +185,10 @@ main {
   background: var(--red);
 }
 
+.unavailable .state-dot {
+  background: #7d8794;
+}
+
 .balance-value {
   display: flex;
   align-items: baseline;
@@ -180,6 +203,10 @@ main {
 
 .critical .balance-value {
   color: var(--red);
+}
+
+.unavailable .balance-value {
+  color: #5f6875;
 }
 
 .balance-value strong {

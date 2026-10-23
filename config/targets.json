@@ -24,12 +24,17 @@
         "学生公寓10栋"
       ],
       "threshold": {
-        "kwh": 8,
-        "amount": 5,
+        "kwhBands": {
+          "early": 70,
+          "strong": 40,
+          "urgent": 20
+        },
         "dailyKwh": 4,
-        "minHours": 36,
         "anomalyMultiplier": 1.8,
-        "anomalyMinSamples": 7
+        "anomalyMinSamples": 7,
+        "anomalyHardLimitKwh": 9,
+        "anomalyMinIntervalHours": 8,
+        "relativeAnomalyEnabled": false
       }
     },
     {

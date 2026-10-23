@@ -73,6 +73,21 @@ export function evaluateThreshold(target, metrics) {
   const alerts = [];
   const effectiveKwh = metrics.kwh ?? metrics.estimatedKwh;
 
+  if (threshold.kwhBands && typeof effectiveKwh === 'number' && Number.isFinite(effectiveKwh)) {
+    const band = balanceBand(threshold.kwhBands, effectiveKwh);
+    if (band) {
+      alerts.push({
+        id: `balance-${band.id}`,
+        level: band.level,
+        metric: metrics.kwh === undefined ? 'estimatedKwh' : 'kwh',
+        band: band.id,
+        repeatHours: band.repeatHours,
+        message: `剩余电量 ${effectiveKwh} 度，已到达${band.label} ${band.limit} 度`
+      });
+    }
+    return alerts;
+  }
+
   if (typeof threshold.kwh === 'number' && effectiveKwh !== undefined && effectiveKwh < threshold.kwh) {
     alerts.push({
       level: effectiveKwh <= (threshold.criticalKwh ?? threshold.kwh / 2) ? 'critical' : 'warning',
@@ -134,23 +149,26 @@ export function detectUsageAnomaly(target, current, historyRows = []) {
   if (usageKwh < 0.05) return null;
 
   const projectedDailyKwh = usageKwh / hours * 24;
+  const minIntervalHours = threshold.anomalyMinIntervalHours ?? 0;
+  if (hours < minIntervalHours) {
+    return usageResult(hours, usageKwh, projectedDailyKwh, { shortInterval: true });
+  }
   const priorRates = buildPriorUsageRates(previousRows);
   const expectedDailyKwh = threshold.dailyKwh;
   const multiplier = threshold.anomalyMultiplier ?? 1.8;
-  const hardLimit = typeof expectedDailyKwh === 'number' ? expectedDailyKwh * multiplier : null;
+  const hardLimit = typeof threshold.anomalyHardLimitKwh === 'number'
+    ? threshold.anomalyHardLimitKwh
+    : typeof expectedDailyKwh === 'number' ? expectedDailyKwh * multiplier : null;
 
   if (hardLimit !== null && projectedDailyKwh > hardLimit) {
-    return anomalyResult('hard-limit', hours, usageKwh, projectedDailyKwh, `折算日耗：${projectedDailyKwh.toFixed(2)} 度超过保守上限${hardLimit.toFixed(1)} 度`);
+    return anomalyResult('hard-limit', hours, usageKwh, projectedDailyKwh, `按 24 小时折算：${projectedDailyKwh.toFixed(2)} 度（非完整一天实耗），超过保守上限 ${hardLimit.toFixed(1)} 度`);
   }
+
+  if (threshold.relativeAnomalyEnabled === false) return usageResult(hours, usageKwh, projectedDailyKwh);
 
   const minSamples = threshold.anomalyMinSamples ?? 7;
   if (priorRates.length < minSamples || typeof expectedDailyKwh !== 'number') {
-    return {
-      kind: 'usage',
-      hours: Number(hours.toFixed(2)),
-      usageKwh: Number(usageKwh.toFixed(2)),
-      projectedDailyKwh: Number(projectedDailyKwh.toFixed(2))
-    };
+    return usageResult(hours, usageKwh, projectedDailyKwh);
   }
 
   const recent = priorRates.slice(-14);
@@ -161,12 +179,7 @@ export function detectUsageAnomaly(target, current, historyRows = []) {
     return anomalyResult('relative-spike', hours, usageKwh, projectedDailyKwh, `折算日耗：${projectedDailyKwh.toFixed(2)} 度高于近期中位${med.toFixed(1)} 度`);
   }
 
-  return {
-    kind: 'usage',
-    hours: Number(hours.toFixed(2)),
-    usageKwh: Number(usageKwh.toFixed(2)),
-    projectedDailyKwh: Number(projectedDailyKwh.toFixed(2))
-  };
+  return usageResult(hours, usageKwh, projectedDailyKwh);
 }
 
 export function summarizeMetrics(metrics) {
@@ -203,11 +216,33 @@ function anomalyResult(kind, hours, usageKwh, projectedDailyKwh, message) {
     usageKwh: Number(usageKwh.toFixed(2)),
     projectedDailyKwh: Number(projectedDailyKwh.toFixed(2)),
     alert: {
+      id: `usage-${kind}`,
       level: 'warning',
       metric: 'usage',
+      repeatHours: 24,
       message
     }
   };
+}
+
+function usageResult(hours, usageKwh, projectedDailyKwh, extra = {}) {
+  return {
+    kind: 'usage',
+    hours: Number(hours.toFixed(2)),
+    usageKwh: Number(usageKwh.toFixed(2)),
+    projectedDailyKwh: Number(projectedDailyKwh.toFixed(2)),
+    isProjection: true,
+    ...extra
+  };
+}
+
+function balanceBand(bands, value) {
+  const definitions = [
+    { id: 'urgent', limit: bands.urgent, level: 'critical', repeatHours: 12, label: '紧急线' },
+    { id: 'strong', limit: bands.strong, level: 'warning', repeatHours: 24, label: '加强提醒线' },
+    { id: 'early', limit: bands.early, level: 'notice', repeatHours: 72, label: '提前提醒线' }
+  ];
+  return definitions.find(item => typeof item.limit === 'number' && value <= item.limit) || null;
 }
 
 function median(values) {

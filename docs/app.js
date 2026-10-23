@@ -1,10 +1,14 @@
+import { getDataStatus } from './status.mjs';
+
 const TARGETS = [
   {
     id: 'lighting',
     title: '照明用电剩余',
     subtitle: '研楼及9-13栋照明/插座',
     color: '#157a5b',
-    expectedDailyKwh: 4
+    expectedDailyKwh: 4,
+    anomalyHardLimitKwh: 9,
+    relativeAnomalyEnabled: false
   },
   {
     id: 'ac',
@@ -64,6 +68,7 @@ function render() {
 }
 
 function renderStatus() {
+  const dataStatus = getDataStatus(state.latest);
   const times = [...new Set([
     state.latest?.updatedAt,
     ...state.history.map(row => row.checkedAt)
@@ -74,7 +79,7 @@ function renderStatus() {
   const updated = times[0] || null;
   const previous = times[1] || null;
   document.getElementById('updatedAt').textContent = updated
-    ? `最近采集 ${formatDateTime(updated)}`
+    ? `${dataStatus.kind === 'ok' ? '最近采集' : '最近成功'} ${formatDateTime(updated)}`
     : '等待第一次采集';
   document.getElementById('previousUpdatedAt').textContent = previous
     ? ` · 上次采集 ${formatDateTime(previous)}`
@@ -82,6 +87,11 @@ function renderStatus() {
 
   const alerts = state.latest?.alerts || [];
   const pill = document.getElementById('statusPill');
+  if (dataStatus.kind !== 'ok') {
+    pill.className = `status-pill ${dataStatus.kind}`;
+    pill.textContent = dataStatus.label;
+    return;
+  }
   const hasCritical = alerts.some(alert => alert.level === 'critical');
   pill.className = `status-pill ${hasCritical ? 'critical' : alerts.length ? 'warn' : 'ok'}`;
   pill.textContent = hasCritical ? '危险' : alerts.length ? '预警' : '正常';
@@ -90,13 +100,16 @@ function renderStatus() {
 function renderBalances() {
   const root = document.getElementById('balances');
   const latestTargets = new Map((state.latest?.targets || []).map(target => [target.id, target]));
+  const dataStatus = getDataStatus(state.latest);
+  const unavailable = dataStatus.kind !== 'ok';
 
   root.innerHTML = TARGETS.map(meta => {
     const target = latestTargets.get(meta.id);
-    const level = target?.alerts?.some(alert => alert.level === 'critical')
+    const level = unavailable ? 'unavailable' : target?.alerts?.some(alert => alert.level === 'critical')
       ? 'critical'
       : target?.alerts?.length ? 'warn' : 'ok';
     const value = target ? displayRemaining(target.metrics) : { main: '--', unit: '度', extra: '暂无数据' };
+    if (unavailable && target) value.extra = '上次成功数据';
     const checkedAt = target?.checkedAt || state.latest?.updatedAt;
 
     return `
@@ -113,7 +126,7 @@ function renderBalances() {
           <span>${escapeHtml(value.unit)}</span>
         </div>
         <div class="balance-foot">
-          <span>${checkedAt ? formatDateTime(new Date(checkedAt)) : '尚未查询'}</span>
+          <span>${checkedAt ? `${formatDateTime(new Date(checkedAt))}${unavailable ? ' · 非实时' : ''}` : '尚未查询'}</span>
           <span>${escapeHtml(value.extra)}</span>
         </div>
       </article>
@@ -201,12 +214,12 @@ function annotateAnomalies(rows) {
     const list = rows.filter(row => row.targetId === meta.id).sort((a, b) => a.date.localeCompare(b.date));
     for (let i = 0; i < list.length; i += 1) {
       const previous = list.slice(Math.max(0, i - 14), i).map(row => row.usage);
-      const hardLimit = meta.expectedDailyKwh * 1.8;
+      const hardLimit = meta.anomalyHardLimitKwh ?? meta.expectedDailyKwh * 1.8;
       if (list[i].usage > hardLimit) {
         list[i].anomaly = `超过保守上限 ${formatNumber(hardLimit)} 度`;
         continue;
       }
-      if (previous.length < 7) continue;
+      if (meta.relativeAnomalyEnabled === false || previous.length < 7) continue;
       const med = median(previous);
       const spread = Math.max(mad(previous, med) * 1.4826, meta.expectedDailyKwh * 0.15, 1);
       const relativeLimit = Math.max(med * 1.7, med + 3 * spread);
@@ -325,6 +338,7 @@ function renderDailySummary(rows) {
     const anomalies = list.filter(row => row.anomaly);
     const latestTarget = (state.latest?.targets || []).find(target => target.id === meta.id);
     const projected = number(latestTarget?.usageInterval?.projectedDailyKwh);
+    const shortInterval = latestTarget?.usageInterval?.shortInterval === true;
     const stable = isBalanceStable(meta.id);
     return `
       <div class="usage-stat">
@@ -332,7 +346,8 @@ function renderDailySummary(rows) {
         <strong>${escapeHtml(meta.title)}</strong>
         <span>近${state.rangeDays}天均值 ${average === null ? '--' : `${formatNumber(average)} 度`}</span>
         <span>最近实际耗电 ${latest ? `${formatNumber(latest.usage)} 度` : '--'}</span>
-        <span>当前折算日耗 ${projected === null ? '--' : `${formatNumber(projected)} 度`}</span>
+        <span>24小时折算（非全天实耗） ${projected === null ? '--' : `${formatNumber(projected)} 度`}</span>
+        ${shortInterval ? '<span class="panel-note">采集间隔不足 8 小时，折算仅供参考</span>' : ''}
         ${stable ? '<span class="panel-note">连续采集余额未变化，暂未观察到耗电</span>' : ''}
         <span class="${anomalies.length ? 'danger-text' : ''}">异常 ${anomalies.length} 次</span>
       </div>

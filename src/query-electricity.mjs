@@ -3,11 +3,13 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { createCasClient, assertCasOk } from './casClient.mjs';
 import { detectUsageAnomaly, evaluateThreshold, extractMetrics, summarizeMetrics } from './thresholds.mjs';
+import { markNotificationsSent, planNotifications } from './notificationPolicy.mjs';
 
 const DEFAULT_CONFIG = 'config/targets.json';
 const EXAMPLE_CONFIG = 'config/targets.example.json';
 const LATEST_PATH = 'docs/data/latest.json';
 const HISTORY_PATH = 'docs/data/history.json';
+const NOTIFICATION_STATE_PATH = 'docs/data/notification-state.json';
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
@@ -36,7 +38,11 @@ async function main() {
   annotateUsage(results, targets, history);
 
   const latest = {
+    status: 'ok',
     updatedAt: now,
+    lastSuccessfulAt: now,
+    failedAt: null,
+    error: null,
     targets: results,
     alerts: results.flatMap(result => result.alerts.map(alert => ({ targetId: result.id, targetName: result.name, ...alert })))
   };
@@ -44,8 +50,12 @@ async function main() {
   await writeJson(LATEST_PATH, latest);
   await appendHistory(HISTORY_PATH, results, history);
 
-  const alertResults = results.filter(result => result.alerts.length > 0);
-  if (alertResults.length > 0) await notifyBark(alertResults, config.defaults?.bark || {});
+  const notificationState = await readJson(NOTIFICATION_STATE_PATH, {});
+  const plan = planNotifications(results, notificationState, now);
+  const sent = plan.results.length > 0
+    ? await notifyBark(plan.results, config.defaults?.bark || {})
+    : false;
+  await writeJson(NOTIFICATION_STATE_PATH, sent ? markNotificationsSent(plan, now) : plan.state);
 
   console.log(JSON.stringify(latest, null, 2));
 }
@@ -239,12 +249,14 @@ async function notifyBark(results, barkConfig) {
   const barkUrl = process.env.BARK_URL;
   if (!barkUrl) {
     console.log('BARK_URL is not set; skip push notification.');
-    return;
+    return false;
   }
 
   const title = results.some(result => result.alerts.some(alert => alert.level === 'critical'))
     ? '南林宿舍电量危险'
-    : '南林宿舍电量预警';
+    : results.some(result => result.alerts.some(alert => alert.level === 'warning'))
+      ? '南林宿舍电量预警'
+      : '南林宿舍电量提醒';
   const body = results.map(result => {
     const shortName = result.id === 'lighting' ? '照明插座' : result.id === 'ac' ? '空调' : result.name;
     const usageAlerts = result.alerts.filter(alert => alert.metric === 'usage');
@@ -270,6 +282,7 @@ async function notifyBark(results, barkConfig) {
 
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Bark notification failed: ${response.status} ${response.statusText}`);
+  return true;
 }
 
 function iconFromPagesBase() {
@@ -303,6 +316,10 @@ async function appendHistory(file, results, existingHistory = null) {
 
 async function readHistory(file) {
   return existsSync(file) ? JSON.parse(await readFile(file, 'utf8')) : [];
+}
+
+async function readJson(file, fallback) {
+  return existsSync(file) ? JSON.parse(await readFile(file, 'utf8')) : fallback;
 }
 
 async function loadConfig(configPath, allowExample) {
