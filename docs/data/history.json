@@ -2710,5 +2710,45 @@
     "summary": "192.3 度",
     "alerts": [],
     "usageInterval": null
+  },
+  {
+    "checkedAt": "2026-10-27T19:19:08.216Z",
+    "id": "lighting",
+    "name": "本部研楼及9-13栋照明/插座",
+    "feeitemid": 489,
+    "kwh": 23.52,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "23.52 度",
+    "alerts": [
+      {
+        "level": "warning",
+        "metric": "usage",
+        "message": "折算日耗：9.79 度超过保守上限7.2 度"
+      }
+    ],
+    "usageInterval": {
+      "kind": "hard-limit",
+      "hours": 14.68,
+      "usageKwh": 5.99,
+      "projectedDailyKwh": 9.79,
+      "alert": {
+        "level": "warning",
+        "metric": "usage",
+        "message": "折算日耗：9.79 度超过保守上限7.2 度"
+      }
+    }
+  },
+  {
+    "checkedAt": "2026-10-27T19:19:08.216Z",
+    "id": "ac",
+    "name": "本部其他公寓空调",
+    "feeitemid": 528,
+    "kwh": 192.3,
+    "estimatedKwh": null,
+    "amount": null,
+    "summary": "192.3 度",
+    "alerts": [],
+    "usageInterval": null
   }
 ]
