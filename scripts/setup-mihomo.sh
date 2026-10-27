@@ -25,8 +25,13 @@ elif [[ -n "${CLASH_SUBSCRIPTION_URL:-}" ]]; then
     echo "Primary subscription URL failed; trying embedded provider URL..."
     embedded_url="$(
       SUBSCRIPTION_URL="$CLASH_SUBSCRIPTION_URL" node -e '
-        const url = new URL(process.env.SUBSCRIPTION_URL);
-        console.log(url.searchParams.get("url") || "");
+        try {
+          const url = new URL(process.env.SUBSCRIPTION_URL);
+          console.log(url.searchParams.get("url") || "");
+        } catch {
+          console.error("Invalid subscription URL.");
+          process.exitCode = 1;
+        }
       '
     )"
     if [[ -z "$embedded_url" ]] || ! download_subscription "$embedded_url"; then
@@ -84,5 +89,5 @@ for _ in $(seq 1 30); do
 done
 
 echo "Mihomo proxy did not become ready in time."
-tail -n 80 "$work_dir/mihomo.log" || true
+echo "Core diagnostics are kept in the runner-local log; they may contain private proxy details."
 exit 1

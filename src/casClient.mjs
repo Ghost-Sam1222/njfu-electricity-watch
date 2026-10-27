@@ -1,6 +1,9 @@
+import { STATUS_CODES } from 'node:http';
+import { PublicError } from './publicError.mjs';
+
 const DEFAULT_BASE_URL = 'https://icard.njfu.edu.cn';
 
-export class CasError extends Error {
+export class CasError extends PublicError {
   constructor(message, response, status) {
     super(message);
     this.name = 'CasError';
@@ -54,7 +57,7 @@ export function createCasClient(options = {}) {
           await sleep(retryDelayMs * attempt);
           continue;
         }
-        throw new Error(`CAS network request failed: ${method} ${url.pathname} (${describeNetworkError(error)})`, { cause: error });
+        throw new PublicError('CAS network request failed: connection unavailable');
       }
       const text = await response.text();
       const data = parseResponse(text);
@@ -63,7 +66,7 @@ export function createCasClient(options = {}) {
         await sleep(retryDelayMs * attempt);
         continue;
       }
-      throw new CasError(`CAS request failed: ${response.status} ${response.statusText}`, data, response.status);
+      throw new CasError(`CAS request failed: ${Number(response.status)} ${STATUS_CODES[response.status] || ''}`.trim(), data, response.status);
     }
   }
 
@@ -96,21 +99,9 @@ function parseResponse(text) {
   }
 }
 
-function describeNetworkError(error) {
-  const cause = error?.cause || error;
-  const details = [
-    cause?.code,
-    cause?.errno,
-    cause?.syscall,
-    cause?.hostname,
-    cause?.message
-  ].filter(Boolean);
-  return details.length ? details.join(' ') : error?.message || 'unknown network error';
-}
-
 export function assertCasOk(data, context) {
   if (data && typeof data === 'object' && 'code' in data && Number(data.code) !== 200) {
-    throw new CasError(`${context} failed: ${data.msg || data.message || data.code}`, data);
+    throw new CasError(`CAS business response failed: code ${Number(data.code) || 'unknown'}`, data);
   }
   return data;
 }
