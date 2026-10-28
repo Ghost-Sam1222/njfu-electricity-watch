@@ -1,11 +1,11 @@
 import dns from 'node:dns/promises';
 import { createCasClient } from './casClient.mjs';
+import { publicErrorMessage } from './publicError.mjs';
 
 const baseUrl = (process.env.CAS_BASE_URL || 'https://icard.njfu.edu.cn').replace(/\/$/, '');
-const host = new URL(baseUrl).hostname;
-
 async function main() {
-  console.log(`Base URL: ${baseUrl}`);
+  const host = new URL(baseUrl).hostname;
+  console.log(`Target host: ${host}`);
   console.log(`HTTPS proxy configured: ${Boolean(process.env.HTTPS_PROXY || process.env.HTTP_PROXY)}`);
   console.log(`NO_PROXY configured: ${Boolean(process.env.NO_PROXY)}`);
   console.log(`SYNJONES_AUTH configured: ${Boolean(process.env.SYNJONES_AUTH || process.env.CAS_TOKEN)}`);
@@ -17,7 +17,7 @@ async function main() {
 
   await step('Open charge app page', async () => {
     const response = await fetch(`${baseUrl}/charge-app/`);
-    return `${response.status} ${response.statusText}`;
+    return `HTTP ${Number(response.status)}`;
   });
 
   await step('Open charge API entry', async () => {
@@ -32,20 +32,19 @@ async function step(name, fn) {
     const result = await fn();
     console.log(`[ok] ${name}: ${result}`);
   } catch (error) {
-    console.log(`[fail] ${name}: ${error.message}`);
+    console.log(`[fail] ${name}: ${publicErrorMessage(error)}`);
   }
 }
 
 function summarizeResponse(data) {
   if (!data || typeof data !== 'object') return typeof data;
   const parts = [];
-  if ('code' in data) parts.push(`code=${data.code}`);
-  if (data.msg || data.message) parts.push(`message=${data.msg || data.message}`);
+  if ('code' in data) parts.push(`code=${Number(data.code) || 'unknown'}`);
   if (data.map || data.data) parts.push('payload=yes');
-  return parts.join(', ') || `keys=${Object.keys(data).slice(0, 8).join(',')}`;
+  return parts.join(', ') || 'unrecognized response';
 }
 
 main().catch(error => {
-  console.error(error.stack || error.message);
+  console.error(publicErrorMessage(error));
   process.exitCode = 1;
 });

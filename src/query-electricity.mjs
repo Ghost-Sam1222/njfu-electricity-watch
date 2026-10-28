@@ -3,11 +3,15 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { createCasClient, assertCasOk } from './casClient.mjs';
 import { detectUsageAnomaly, evaluateThreshold, extractMetrics, summarizeMetrics } from './thresholds.mjs';
+import { markNotificationsSent, planNotifications } from './notificationPolicy.mjs';
+import { sendBarkRequest } from './bark.mjs';
+import { PublicError, publicErrorMessage } from './publicError.mjs';
 
 const DEFAULT_CONFIG = 'config/targets.json';
 const EXAMPLE_CONFIG = 'config/targets.example.json';
 const LATEST_PATH = 'docs/data/latest.json';
 const HISTORY_PATH = 'docs/data/history.json';
+const NOTIFICATION_STATE_PATH = 'docs/data/notification-state.json';
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
@@ -36,7 +40,11 @@ async function main() {
   annotateUsage(results, targets, history);
 
   const latest = {
+    status: 'ok',
     updatedAt: now,
+    lastSuccessfulAt: now,
+    failedAt: null,
+    error: null,
     targets: results,
     alerts: results.flatMap(result => result.alerts.map(alert => ({ targetId: result.id, targetName: result.name, ...alert })))
   };
@@ -44,8 +52,12 @@ async function main() {
   await writeJson(LATEST_PATH, latest);
   await appendHistory(HISTORY_PATH, results, history);
 
-  const alertResults = results.filter(result => result.alerts.length > 0);
-  if (alertResults.length > 0) await notifyBark(alertResults, config.defaults?.bark || {});
+  const notificationState = await readJson(NOTIFICATION_STATE_PATH, {});
+  const plan = planNotifications(results, notificationState, now);
+  const sent = plan.results.length > 0
+    ? await notifyBark(plan.results, config.defaults?.bark || {})
+    : false;
+  await writeJson(NOTIFICATION_STATE_PATH, sent ? markNotificationsSent(plan, now) : plan.state);
 
   console.log(JSON.stringify(latest, null, 2));
 }
@@ -58,6 +70,9 @@ async function queryTarget(client, target, defaults) {
   const map = response.map || response.data || response;
   const showData = map.showData || map.data?.showData || map.data || map;
   const metrics = extractMetrics(showData, defaults);
+  if (!Number.isFinite(metrics.kwh ?? metrics.estimatedKwh ?? metrics.amount)) {
+    throw new PublicError('CAS returned no valid electricity balance');
+  }
   const alerts = evaluateThreshold(target, metrics);
 
   const result = {
@@ -239,12 +254,14 @@ async function notifyBark(results, barkConfig) {
   const barkUrl = process.env.BARK_URL;
   if (!barkUrl) {
     console.log('BARK_URL is not set; skip push notification.');
-    return;
+    return false;
   }
 
   const title = results.some(result => result.alerts.some(alert => alert.level === 'critical'))
     ? '南林宿舍电量危险'
-    : '南林宿舍电量预警';
+    : results.some(result => result.alerts.some(alert => alert.level === 'warning'))
+      ? '南林宿舍电量预警'
+      : '南林宿舍电量提醒';
   const body = results.map(result => {
     const shortName = result.id === 'lighting' ? '照明插座' : result.id === 'ac' ? '空调' : result.name;
     const usageAlerts = result.alerts.filter(alert => alert.metric === 'usage');
@@ -268,8 +285,7 @@ async function notifyBark(results, barkConfig) {
   const icon = process.env.BARK_ICON_URL || iconFromPagesBase();
   if (icon) url.searchParams.set('icon', icon);
 
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`Bark notification failed: ${response.status} ${response.statusText}`);
+  return sendBarkRequest(url);
 }
 
 function iconFromPagesBase() {
@@ -303,6 +319,10 @@ async function appendHistory(file, results, existingHistory = null) {
 
 async function readHistory(file) {
   return existsSync(file) ? JSON.parse(await readFile(file, 'utf8')) : [];
+}
+
+async function readJson(file, fallback) {
+  return existsSync(file) ? JSON.parse(await readFile(file, 'utf8')) : fallback;
 }
 
 async function loadConfig(configPath, allowExample) {
@@ -346,9 +366,9 @@ function parseArgs(argv) {
 }
 
 main().catch(async error => {
-  console.error(error.stack || error.message);
+  console.error(publicErrorMessage(error));
   await notifyFailureBark(error).catch(notifyError => {
-    console.error(`Bark failure notification skipped: ${notifyError.message}`);
+    console.error(`Bark failure notification skipped: ${publicErrorMessage(notifyError)}`);
   });
   process.exitCode = 1;
 });
@@ -360,7 +380,7 @@ async function notifyFailureBark(error) {
   const title = '南林电力守夜查询失败';
   const body = [
     '自动查询没有成功，本次电量状态未知。',
-    `原因：${error.message || '未知错误'}`,
+    `原因：${publicErrorMessage(error)}`,
     '如果连续出现，请检查一卡通登录状态或 GitHub Actions 访问学校系统的网络路径。'
   ].join('\n');
   const url = new URL(encodeURIComponent(title) + '/' + encodeURIComponent(body), ensureSlash(barkUrl));
@@ -368,6 +388,5 @@ async function notifyFailureBark(error) {
   url.searchParams.set('sound', process.env.BARK_SOUND || 'alarm');
   url.searchParams.set('level', 'timeSensitive');
 
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`Bark notification failed: ${response.status} ${response.statusText}`);
+  return sendBarkRequest(url);
 }

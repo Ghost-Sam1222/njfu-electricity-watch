@@ -46,6 +46,7 @@ jobs:
         run: npm run diagnose
 
       - name: Query electricity balances
+        id: electricity_query
         if: ${{ inputs.diagnose != 'true' }}
         env:
           NODE_OPTIONS: --use-env-proxy
@@ -57,8 +58,19 @@ jobs:
         run: npm run query
 
       - name: Commit updated data
-        if: ${{ inputs.diagnose != 'true' }}
+        if: ${{ success() && inputs.diagnose != 'true' }}
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: update electricity data"
           file_pattern: "docs/data/*.json"
+
+      - name: Mark collection failure
+        if: ${{ always() && inputs.diagnose != 'true' && steps.electricity_query.outcome != 'success' }}
+        run: npm run mark:collection-failed
+
+      - name: Commit failed collection status
+        if: ${{ always() && inputs.diagnose != 'true' && steps.electricity_query.outcome != 'success' }}
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: mark electricity collection failure"
+          file_pattern: "docs/data/latest.json"

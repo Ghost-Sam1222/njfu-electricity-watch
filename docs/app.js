@@ -1,10 +1,16 @@
+import { getDataStatus } from './status.mjs';
+import { buildDailyUsage, filterUsageRange } from './usage.mjs';
+
 const TARGETS = [
   {
     id: 'lighting',
     title: '照明用电剩余',
     subtitle: '研楼及9-13栋照明/插座',
     color: '#157a5b',
-    expectedDailyKwh: 4
+    expectedDailyKwh: 4,
+    anomalyHardLimitKwh: 9,
+    anomalyMinIntervalHours: 8,
+    relativeAnomalyEnabled: false
   },
   {
     id: 'ac',
@@ -64,6 +70,7 @@ function render() {
 }
 
 function renderStatus() {
+  const dataStatus = getDataStatus(state.latest);
   const times = [...new Set([
     state.latest?.updatedAt,
     ...state.history.map(row => row.checkedAt)
@@ -74,7 +81,7 @@ function renderStatus() {
   const updated = times[0] || null;
   const previous = times[1] || null;
   document.getElementById('updatedAt').textContent = updated
-    ? `最近采集 ${formatDateTime(updated)}`
+    ? `${dataStatus.kind === 'ok' ? '最近采集' : '最近成功'} ${formatDateTime(updated)}`
     : '等待第一次采集';
   document.getElementById('previousUpdatedAt').textContent = previous
     ? ` · 上次采集 ${formatDateTime(previous)}`
@@ -82,6 +89,11 @@ function renderStatus() {
 
   const alerts = state.latest?.alerts || [];
   const pill = document.getElementById('statusPill');
+  if (dataStatus.kind !== 'ok') {
+    pill.className = `status-pill ${dataStatus.kind}`;
+    pill.textContent = dataStatus.label;
+    return;
+  }
   const hasCritical = alerts.some(alert => alert.level === 'critical');
   pill.className = `status-pill ${hasCritical ? 'critical' : alerts.length ? 'warn' : 'ok'}`;
   pill.textContent = hasCritical ? '危险' : alerts.length ? '预警' : '正常';
@@ -90,13 +102,16 @@ function renderStatus() {
 function renderBalances() {
   const root = document.getElementById('balances');
   const latestTargets = new Map((state.latest?.targets || []).map(target => [target.id, target]));
+  const dataStatus = getDataStatus(state.latest);
+  const unavailable = dataStatus.kind !== 'ok';
 
   root.innerHTML = TARGETS.map(meta => {
     const target = latestTargets.get(meta.id);
-    const level = target?.alerts?.some(alert => alert.level === 'critical')
+    const level = unavailable ? 'unavailable' : target?.alerts?.some(alert => alert.level === 'critical')
       ? 'critical'
       : target?.alerts?.length ? 'warn' : 'ok';
     const value = target ? displayRemaining(target.metrics) : { main: '--', unit: '度', extra: '暂无数据' };
+    if (unavailable && target) value.extra = '上次成功数据';
     const checkedAt = target?.checkedAt || state.latest?.updatedAt;
 
     return `
@@ -113,7 +128,7 @@ function renderBalances() {
           <span>${escapeHtml(value.unit)}</span>
         </div>
         <div class="balance-foot">
-          <span>${checkedAt ? formatDateTime(new Date(checkedAt)) : '尚未查询'}</span>
+          <span>${checkedAt ? `${formatDateTime(new Date(checkedAt))}${unavailable ? ' · 非实时' : ''}` : '尚未查询'}</span>
           <span>${escapeHtml(value.extra)}</span>
         </div>
       </article>
@@ -122,7 +137,7 @@ function renderBalances() {
 }
 
 function renderDailyUsage() {
-  const rows = filterUsageRange(buildDailyUsage(state.history), state.rangeDays);
+  const rows = filterUsageRange(buildDailyUsage(state.history, TARGETS), state.rangeDays);
   drawDailyLineChart(document.getElementById('dailyLineChart'), rows);
   drawUsagePieChart(document.getElementById('usagePieChart'), rows);
   renderDailySummary(rows);
@@ -147,74 +162,6 @@ function displayRemaining(metrics = {}) {
     };
   }
   return { main: '--', unit: '度', extra: '未识别数据' };
-}
-
-function buildDailyUsage(history) {
-  const byTarget = groupBy(
-    history.filter(row => remainingKwh(row) !== null && row.checkedAt),
-    row => row.id
-  );
-  const dailyMap = new Map();
-
-  for (const [targetId, rows] of Object.entries(byTarget)) {
-    const sorted = rows.slice().sort((a, b) => Date.parse(a.checkedAt) - Date.parse(b.checkedAt));
-    for (let i = 1; i < sorted.length; i += 1) {
-      const prev = sorted[i - 1];
-      const curr = sorted[i];
-      const prevKwh = remainingKwh(prev);
-      const currKwh = remainingKwh(curr);
-      const hours = (Date.parse(curr.checkedAt) - Date.parse(prev.checkedAt)) / 36e5;
-      const usage = prevKwh - currKwh;
-      if (hours <= 0 || hours > 72 || usage < 0.05) continue;
-
-      const date = localDateKey(new Date(curr.checkedAt));
-      const key = `${date}:${targetId}`;
-      const row = dailyMap.get(key) || {
-        date,
-        targetId,
-        usage: 0,
-        intervals: 0,
-        anomaly: null
-      };
-      row.usage += usage;
-      row.intervals += 1;
-      dailyMap.set(key, row);
-    }
-  }
-
-  const rows = Array.from(dailyMap.values())
-    .map(row => ({ ...row, usage: Number(row.usage.toFixed(2)) }))
-    .sort((a, b) => a.date.localeCompare(b.date));
-
-  annotateAnomalies(rows);
-  return rows;
-}
-
-function filterUsageRange(rows, days) {
-  const dates = Array.from(new Set(rows.map(row => row.date))).sort();
-  const visibleDates = dates.slice(-days);
-  return rows.filter(row => visibleDates.includes(row.date));
-}
-
-function annotateAnomalies(rows) {
-  for (const meta of TARGETS) {
-    const list = rows.filter(row => row.targetId === meta.id).sort((a, b) => a.date.localeCompare(b.date));
-    for (let i = 0; i < list.length; i += 1) {
-      const previous = list.slice(Math.max(0, i - 14), i).map(row => row.usage);
-      const hardLimit = meta.expectedDailyKwh * 1.8;
-      if (list[i].usage > hardLimit) {
-        list[i].anomaly = `超过保守上限 ${formatNumber(hardLimit)} 度`;
-        continue;
-      }
-      if (previous.length < 7) continue;
-      const med = median(previous);
-      const spread = Math.max(mad(previous, med) * 1.4826, meta.expectedDailyKwh * 0.15, 1);
-      const relativeLimit = Math.max(med * 1.7, med + 3 * spread);
-      if (list[i].usage > relativeLimit) {
-        list[i].anomaly = `高于近期中位 ${formatNumber(med)} 度`;
-      }
-    }
-  }
 }
 
 function drawDailyLineChart(canvas, rows) {
@@ -325,14 +272,16 @@ function renderDailySummary(rows) {
     const anomalies = list.filter(row => row.anomaly);
     const latestTarget = (state.latest?.targets || []).find(target => target.id === meta.id);
     const projected = number(latestTarget?.usageInterval?.projectedDailyKwh);
+    const shortInterval = latestTarget?.usageInterval?.shortInterval === true;
     const stable = isBalanceStable(meta.id);
     return `
       <div class="usage-stat">
         <span class="legend-dot" style="background: ${meta.color}"></span>
         <strong>${escapeHtml(meta.title)}</strong>
-        <span>近${state.rangeDays}天均值 ${average === null ? '--' : `${formatNumber(average)} 度`}</span>
-        <span>最近实际耗电 ${latest ? `${formatNumber(latest.usage)} 度` : '--'}</span>
-        <span>当前折算日耗 ${projected === null ? '--' : `${formatNumber(projected)} 度`}</span>
+        <span>近${state.rangeDays}个采集结束日区间实耗均值 ${average === null ? '--' : `${formatNumber(average)} 度`}</span>
+        <span>最近采集区间实耗 ${latest ? `${formatNumber(latest.usage)} 度（覆盖 ${formatNumber(latest.hours)} 小时）` : '--'}</span>
+        <span>24小时折算（非全天实耗） ${projected === null ? '--' : `${formatNumber(projected)} 度`}</span>
+        ${shortInterval ? '<span class="panel-note">采集间隔不足 8 小时，折算仅供参考</span>' : ''}
         ${stable ? '<span class="panel-note">连续采集余额未变化，暂未观察到耗电</span>' : ''}
         <span class="${anomalies.length ? 'danger-text' : ''}">异常 ${anomalies.length} 次</span>
       </div>
@@ -343,7 +292,7 @@ function renderDailySummary(rows) {
   const anomalyText = anomalyRows.length
     ? anomalyRows.map(row => {
       const meta = TARGETS.find(item => item.id === row.targetId);
-      return `<li>${escapeHtml(row.date)} ${escapeHtml(meta?.title || row.targetId)} ${formatNumber(row.usage)} 度，${escapeHtml(row.anomaly)}</li>`;
+      return `<li>${escapeHtml(row.date)} ${escapeHtml(meta?.title || row.targetId)} 区间实耗 ${formatNumber(row.usage)} 度（覆盖 ${formatNumber(row.hours)} 小时），${escapeHtml(row.anomaly)}</li>`;
     }).join('')
     : '<li>近期没有日耗突增。</li>';
 
@@ -422,7 +371,7 @@ function nearestChartPoint(canvas, event) {
 function showChartTooltip(canvas, point) {
   const tooltip = document.getElementById('chartTooltip');
   const meta = TARGETS.find(item => item.id === point.row.targetId);
-  tooltip.innerHTML = `<strong>${escapeHtml(point.row.date)} · ${escapeHtml(meta?.title || point.row.targetId)}</strong>实际耗电 ${formatNumber(point.row.usage)} 度`;
+  tooltip.innerHTML = `<strong>${escapeHtml(point.row.date)} · ${escapeHtml(meta?.title || point.row.targetId)}</strong>采集区间实耗 ${formatNumber(point.row.usage)} 度<br>覆盖 ${formatNumber(point.row.hours)} 小时 · 24小时折算 ${formatNumber(point.row.projectedDailyKwh)} 度`;
   tooltip.hidden = false;
   const left = Math.max(6, Math.min(canvas.clientWidth - tooltip.offsetWidth - 6, point.x + 10));
   const top = Math.max(38, point.y - 8);
@@ -514,7 +463,7 @@ function drawAxes(ctx, { x0, y0, plotW, plotH }, dates, max) {
     ctx.fillText(date.slice(5), x, y0 + plotH + 22);
   });
   ctx.textAlign = 'left';
-  ctx.fillText('度/日', x0, y0 - 7);
+  ctx.fillText('区间度数', x0, y0 - 7);
   ctx.textAlign = 'right';
   ctx.fillText('日期', x0 + plotW, y0 + plotH + 42);
 }
@@ -554,25 +503,6 @@ function number(value) {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
-function median(values) {
-  const sorted = values.slice().sort((a, b) => a - b);
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
-}
-
-function mad(values, med) {
-  return median(values.map(value => Math.abs(value - med)));
-}
-
-function groupBy(rows, fn) {
-  return rows.reduce((acc, row) => {
-    const key = fn(row);
-    acc[key] ||= [];
-    acc[key].push(row);
-    return acc;
-  }, {});
-}
-
 function scale(value, min, max, size) {
   if (max === min) return size / 2;
   return (value - min) / (max - min) * size;
@@ -585,13 +515,6 @@ function formatDateTime(date) {
     hour: '2-digit',
     minute: '2-digit'
   });
-}
-
-function localDateKey(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
 }
 
 function formatNumber(value) {
