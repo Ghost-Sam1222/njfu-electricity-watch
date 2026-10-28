@@ -59,24 +59,14 @@ YAML
 mv "$tmp_config" "$config_file"
 
 echo "Downloading Mihomo core..."
-asset_url="$(
-  curl -fsSL https://api.github.com/repos/MetaCubeX/mihomo/releases/latest |
-  node -e '
-    const fs = require("node:fs");
-    const release = JSON.parse(fs.readFileSync(0, "utf8"));
-    const assets = release.assets || [];
-    const preferred = assets.find(asset => /mihomo-linux-amd64-v1-.*\.gz$/.test(asset.name))
-      || assets.find(asset => /mihomo-linux-amd64-compatible-.*\.gz$/.test(asset.name))
-      || assets.find(asset => /mihomo-linux-amd64.*\.gz$/.test(asset.name));
-    if (!preferred) {
-      console.error("No linux amd64 Mihomo asset found.");
-      process.exit(1);
-    }
-    console.log(preferred.browser_download_url);
-  '
-)"
-
-curl -fsSL "$asset_url" -o "$work_dir/mihomo.gz"
+mihomo_version="${MIHOMO_VERSION:-v1.19.33}"
+if [[ ! "$mihomo_version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  echo "Invalid MIHOMO_VERSION: $mihomo_version"
+  exit 1
+fi
+asset_url="https://github.com/MetaCubeX/mihomo/releases/download/${mihomo_version}/mihomo-linux-amd64-v1-${mihomo_version}.gz"
+curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 "$asset_url" -o "$work_dir/mihomo.gz"
+gzip -t "$work_dir/mihomo.gz"
 gzip -dc "$work_dir/mihomo.gz" > "$binary_file"
 chmod +x "$binary_file"
 

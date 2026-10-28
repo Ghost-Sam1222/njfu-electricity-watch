@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test": "node --test",
     "discover": "node src/query-electricity.mjs --discover",
     "diagnose": "node src/diagnose-network.mjs",
     "query": "node src/query-electricity.mjs",

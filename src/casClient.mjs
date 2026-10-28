@@ -1,10 +1,11 @@
 const DEFAULT_BASE_URL = 'https://icard.njfu.edu.cn';
 
 export class CasError extends Error {
-  constructor(message, response) {
+  constructor(message, response, status) {
     super(message);
     this.name = 'CasError';
     this.response = response;
+    this.status = status;
   }
 }
 
@@ -16,6 +17,8 @@ export function normalizeToken(token) {
 export function createCasClient(options = {}) {
   const baseUrl = (options.baseUrl || process.env.CAS_BASE_URL || DEFAULT_BASE_URL).replace(/\/$/, '');
   const token = normalizeToken(options.token || process.env.SYNJONES_AUTH || process.env.CAS_TOKEN);
+  const retryAttempts = options.retryAttempts ?? 3;
+  const retryDelayMs = options.retryDelayMs ?? 800;
 
   async function request(path, { method = 'GET', params, body, form = false } = {}) {
     const url = new URL(path, baseUrl);
@@ -42,18 +45,26 @@ export function createCasClient(options = {}) {
       }
     }
 
-    let response;
-    try {
-      response = await fetch(url, { method, headers, body: payload });
-    } catch (error) {
-      throw new Error(`CAS network request failed: ${method} ${url.pathname} (${describeNetworkError(error)})`, { cause: error });
+    for (let attempt = 1; attempt <= retryAttempts; attempt += 1) {
+      let response;
+      try {
+        response = await fetch(url, { method, headers, body: payload });
+      } catch (error) {
+        if (attempt < retryAttempts) {
+          await sleep(retryDelayMs * attempt);
+          continue;
+        }
+        throw new Error(`CAS network request failed: ${method} ${url.pathname} (${describeNetworkError(error)})`, { cause: error });
+      }
+      const text = await response.text();
+      const data = parseResponse(text);
+      if (response.ok) return data;
+      if (isTransientStatus(response.status) && attempt < retryAttempts) {
+        await sleep(retryDelayMs * attempt);
+        continue;
+      }
+      throw new CasError(`CAS request failed: ${response.status} ${response.statusText}`, data, response.status);
     }
-    const text = await response.text();
-    const data = parseResponse(text);
-    if (!response.ok) {
-      throw new CasError(`CAS request failed: ${response.status} ${response.statusText}`, data);
-    }
-    return data;
   }
 
   return {
@@ -66,6 +77,14 @@ export function createCasClient(options = {}) {
     getCardBillRows: params => request('/berserker-search/search/personal/turnover', { params }),
     getCardBillCount: params => request('/berserker-search/statistics/turnover/count', { params })
   };
+}
+
+function isTransientStatus(status) {
+  return [408, 429, 500, 502, 503, 504].includes(status);
+}
+
+function sleep(milliseconds) {
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
 
 function parseResponse(text) {
