@@ -1,6 +1,6 @@
 export function getDataStatus(latest, now = new Date(), staleAfterHours = 18) {
+  if (latest?.status === 'error') return { kind: 'error', label: '采集失败' };
   if (!latest?.updatedAt && !latest?.lastSuccessfulAt) return { kind: 'empty', label: '无数据' };
-  if (latest.status === 'error') return { kind: 'error', label: '采集失败' };
 
   const timestamp = Date.parse(latest.lastSuccessfulAt || latest.updatedAt);
   const current = now instanceof Date ? now.getTime() : Date.parse(now);

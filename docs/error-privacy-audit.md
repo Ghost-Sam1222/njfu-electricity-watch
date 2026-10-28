@@ -15,3 +15,11 @@ All 12 synthetic checks passed. They exercise the actual collection CLI, failure
 The collection CLI initially failed five of the first nine checks: four credential disclosures and an HTML response incorrectly recorded as success. Separate tests then reproduced invalid diagnostic/subscription URL disclosures and proxy core-log disclosure before their fixes.
 
 No real credentials, school queries, notifications, Actions runs or deployments are used by this verification. It validates error handling with mocked failures, not the availability of any external service.
+
+## Dashboard consumer verification
+
+Run `node --test test/dashboardConsumer.test.mjs`. Three focused checks execute the existing `docs/app.js` page entry point with synthetic fetch responses and DOM/canvas sinks. Failure snapshots come from the real `mark-collection-failure.mjs` command in disposable directories; balance alerts come from the existing threshold evaluator with synthetic 70/40/20 bands.
+
+Cached 70/40/20 balances already render as unavailable after failure or expiry, with the failure/stale status taking priority over their old balance alerts. Recent successful balances retain their warning/critical appearance. Unknown readings render as `--`, without inventing zero.
+
+One gap was reproduced before the fix: the very first failed collection, with no prior success timestamp, rendered as “无数据” instead of “采集失败”. The status classifier now checks explicit failure before absence of timestamps. All three checks pass. This verifies the real JavaScript consumer and generated card markup, but does not test browser pixels, external hosting or live data.
