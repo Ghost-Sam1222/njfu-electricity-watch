@@ -52,6 +52,7 @@ jobs:
           NODE_OPTIONS: --use-env-proxy
           SYNJONES_AUTH: ${{ secrets.SYNJONES_AUTH }}
           BARK_URL: ${{ secrets.BARK_URL }}
+          BARK_ICON_URL: https://ghost-sam1222.github.io/njfu-electricity-watch/assets/njfu-power-alert.png
           HTTPS_PROXY: ${{ steps.mihomo.outputs.proxy || secrets.HTTPS_PROXY }}
           HTTP_PROXY: ${{ steps.mihomo.outputs.proxy || secrets.HTTP_PROXY }}
           NO_PROXY: ${{ vars.NO_PROXY }}

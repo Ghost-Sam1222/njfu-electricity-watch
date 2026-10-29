@@ -388,5 +388,8 @@ async function notifyFailureBark(error) {
   url.searchParams.set('sound', process.env.BARK_SOUND || 'alarm');
   url.searchParams.set('level', 'timeSensitive');
 
+  const icon = process.env.BARK_ICON_URL || iconFromPagesBase();
+  if (icon) url.searchParams.set('icon', icon);
+
   return sendBarkRequest(url);
 }
