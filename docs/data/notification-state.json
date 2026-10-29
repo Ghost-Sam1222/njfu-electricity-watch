@@ -1,0 +1,11 @@
+{
+  "updatedAt": "2026-10-29T05:22:53.962Z",
+  "active": {
+    "lighting:balance": {
+      "level": "critical",
+      "band": "urgent",
+      "lastSeenAt": "2026-10-29T05:22:53.962Z",
+      "lastNotifiedAt": "2026-10-29T05:22:53.962Z"
+    }
+  }
+}
