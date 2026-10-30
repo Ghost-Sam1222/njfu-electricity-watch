@@ -1,32 +1,21 @@
 {
-  "status": "error",
-  "updatedAt": "2026-10-29T05:22:53.962Z",
-  "lastSuccessfulAt": "2026-10-29T05:22:53.962Z",
-  "failedAt": "2026-10-29T19:32:28.167Z",
-  "error": {
-    "message": "自动采集失败，余额状态未知"
-  },
+  "status": "ok",
+  "updatedAt": "2026-10-30T05:22:35.861Z",
+  "lastSuccessfulAt": "2026-10-30T05:22:35.861Z",
+  "failedAt": null,
+  "error": null,
   "targets": [
     {
-      "checkedAt": "2026-10-29T05:22:53.962Z",
+      "checkedAt": "2026-10-30T05:22:35.861Z",
       "id": "lighting",
       "name": "本部研楼及9-13栋照明/插座",
       "feeitemid": 489,
       "metrics": {
-        "kwh": 17.93,
+        "kwh": 186.26,
         "kwhSource": "信息"
       },
-      "summary": "17.93 度",
-      "alerts": [
-        {
-          "id": "balance-urgent",
-          "level": "critical",
-          "metric": "kwh",
-          "band": "urgent",
-          "repeatHours": 12,
-          "message": "剩余电量 17.93 度，已到达紧急线 20 度"
-        }
-      ],
+      "summary": "186.26 度",
+      "alerts": [],
       "queryParams": {
         "type": "IEC",
         "campus": "主校区&主校区",
@@ -36,15 +25,14 @@
         "feeitemid": 489
       },
       "usageInterval": {
-        "kind": "usage",
-        "hours": 9.96,
-        "usageKwh": 0.09,
-        "projectedDailyKwh": 0.22,
-        "isProjection": true
+        "kind": "recharge",
+        "hours": 23.99,
+        "usageKwh": 0,
+        "projectedDailyKwh": 0
       }
     },
     {
-      "checkedAt": "2026-10-29T05:22:53.962Z",
+      "checkedAt": "2026-10-30T05:22:35.861Z",
       "id": "ac",
       "name": "本部其他公寓空调",
       "feeitemid": 528,
@@ -64,16 +52,5 @@
       }
     }
   ],
-  "alerts": [
-    {
-      "targetId": "lighting",
-      "targetName": "本部研楼及9-13栋照明/插座",
-      "id": "balance-urgent",
-      "level": "critical",
-      "metric": "kwh",
-      "band": "urgent",
-      "repeatHours": 12,
-      "message": "剩余电量 17.93 度，已到达紧急线 20 度"
-    }
-  ]
+  "alerts": []
 }
