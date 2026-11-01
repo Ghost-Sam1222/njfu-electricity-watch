@@ -1,21 +1,29 @@
 {
   "status": "ok",
-  "updatedAt": "2026-11-01T05:37:37.951Z",
-  "lastSuccessfulAt": "2026-11-01T05:37:37.951Z",
+  "updatedAt": "2026-11-01T18:49:31.694Z",
+  "lastSuccessfulAt": "2026-11-01T18:49:31.694Z",
   "failedAt": null,
   "error": null,
   "targets": [
     {
-      "checkedAt": "2026-11-01T05:37:37.951Z",
+      "checkedAt": "2026-11-01T18:49:31.694Z",
       "id": "lighting",
       "name": "本部研楼及9-13栋照明/插座",
       "feeitemid": 489,
       "metrics": {
-        "kwh": 175.25,
+        "kwh": 170.17,
         "kwhSource": "信息"
       },
-      "summary": "175.25 度",
-      "alerts": [],
+      "summary": "170.17 度",
+      "alerts": [
+        {
+          "id": "usage-hard-limit",
+          "level": "warning",
+          "metric": "usage",
+          "repeatHours": 24,
+          "message": "按 24 小时折算：9.24 度（非完整一天实耗），超过保守上限 9.0 度"
+        }
+      ],
       "queryParams": {
         "type": "IEC",
         "campus": "主校区&主校区",
@@ -25,15 +33,21 @@
         "feeitemid": 489
       },
       "usageInterval": {
-        "kind": "usage",
-        "hours": 11.22,
-        "usageKwh": 1.22,
-        "projectedDailyKwh": 2.61,
-        "isProjection": true
+        "kind": "hard-limit",
+        "hours": 13.2,
+        "usageKwh": 5.08,
+        "projectedDailyKwh": 9.24,
+        "alert": {
+          "id": "usage-hard-limit",
+          "level": "warning",
+          "metric": "usage",
+          "repeatHours": 24,
+          "message": "按 24 小时折算：9.24 度（非完整一天实耗），超过保守上限 9.0 度"
+        }
       }
     },
     {
-      "checkedAt": "2026-11-01T05:37:37.951Z",
+      "checkedAt": "2026-11-01T18:49:31.694Z",
       "id": "ac",
       "name": "本部其他公寓空调",
       "feeitemid": 528,
@@ -53,5 +67,15 @@
       }
     }
   ],
-  "alerts": []
+  "alerts": [
+    {
+      "targetId": "lighting",
+      "targetName": "本部研楼及9-13栋照明/插座",
+      "id": "usage-hard-limit",
+      "level": "warning",
+      "metric": "usage",
+      "repeatHours": 24,
+      "message": "按 24 小时折算：9.24 度（非完整一天实耗），超过保守上限 9.0 度"
+    }
+  ]
 }
