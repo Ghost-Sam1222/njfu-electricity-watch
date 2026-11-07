@@ -1,9 +1,11 @@
 {
-  "status": "ok",
+  "status": "error",
   "updatedAt": "2026-11-06T20:19:41.215Z",
   "lastSuccessfulAt": "2026-11-06T20:19:41.215Z",
-  "failedAt": null,
-  "error": null,
+  "failedAt": "2026-11-07T05:37:28.344Z",
+  "error": {
+    "message": "自动采集失败，余额状态未知"
+  },
   "targets": [
     {
       "checkedAt": "2026-11-06T20:19:41.215Z",
