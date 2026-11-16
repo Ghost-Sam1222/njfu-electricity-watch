@@ -1,22 +1,20 @@
 {
-  "status": "error",
-  "updatedAt": "2026-11-15T05:56:46.428Z",
-  "lastSuccessfulAt": "2026-11-15T05:56:46.428Z",
-  "failedAt": "2026-11-15T19:40:19.042Z",
-  "error": {
-    "message": "自动采集失败，余额状态未知"
-  },
+  "status": "ok",
+  "updatedAt": "2026-11-16T05:56:42.416Z",
+  "lastSuccessfulAt": "2026-11-16T05:56:42.416Z",
+  "failedAt": null,
+  "error": null,
   "targets": [
     {
-      "checkedAt": "2026-11-15T05:56:46.428Z",
+      "checkedAt": "2026-11-16T05:56:42.416Z",
       "id": "lighting",
       "name": "本部研楼及9-13栋照明/插座",
       "feeitemid": 489,
       "metrics": {
-        "kwh": 115.38,
+        "kwh": 112.67,
         "kwhSource": "信息"
       },
-      "summary": "115.38 度",
+      "summary": "112.67 度",
       "alerts": [],
       "queryParams": {
         "type": "IEC",
@@ -28,14 +26,14 @@
       },
       "usageInterval": {
         "kind": "usage",
-        "hours": 24.02,
-        "usageKwh": 4.54,
-        "projectedDailyKwh": 4.54,
+        "hours": 24,
+        "usageKwh": 2.71,
+        "projectedDailyKwh": 2.71,
         "isProjection": true
       }
     },
     {
-      "checkedAt": "2026-11-15T05:56:46.428Z",
+      "checkedAt": "2026-11-16T05:56:42.416Z",
       "id": "ac",
       "name": "本部其他公寓空调",
       "feeitemid": 528,
