@@ -1,10 +1,10 @@
 {
-  "updatedAt": "2026-11-27T07:53:18.473Z",
+  "updatedAt": "2026-11-27T22:36:26.064Z",
   "active": {
     "lighting:balance": {
       "level": "notice",
       "band": "early",
-      "lastSeenAt": "2026-11-27T07:53:18.473Z",
+      "lastSeenAt": "2026-11-27T22:36:26.064Z",
       "lastNotifiedAt": "2026-11-25T23:00:11.166Z"
     }
   }
